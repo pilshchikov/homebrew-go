@@ -1,4 +1,4 @@
-module github.com/homebrew/brew
+module github.com/pilshchikov/homebrew-go
 
 go 1.20
 

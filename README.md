@@ -64,7 +64,7 @@ If you have Go installed:
 ```bash
 git clone https://github.com/pilshchikov/homebrew-go.git
 cd homebrew-go
-make build
+go build -o build/brew ./cmd/brew
 ./build/brew --version
 ```
 

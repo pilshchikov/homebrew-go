@@ -1,0 +1,44 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Launch Homebrew Go",
+      "type": "go",
+      "request": "launch",
+      "mode": "auto",
+      "program": "${workspaceFolder}/cmd/brew",
+      "env": {
+        "HOMEBREW_NO_AUTO_UPDATE": "1"
+      },
+      "args": ["--help"],
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Test Current Package",
+      "type": "go",
+      "request": "launch",
+      "mode": "test",
+      "program": "${workspaceFolder}/${relativeFileDirname}",
+      "env": {},
+      "args": ["-test.v"]
+    },
+    {
+      "name": "Debug Test",
+      "type": "go",
+      "request": "launch",
+      "mode": "test",
+      "program": "${workspaceFolder}/${relativeFileDirname}",
+      "env": {},
+      "args": ["-test.run", "^${input:testName}$", "-test.v"],
+      "showLog": true
+    }
+  ],
+  "inputs": [
+    {
+      "id": "testName",
+      "description": "Name of the test to run",
+      "default": "",
+      "type": "promptString"
+    }
+  ]
+}

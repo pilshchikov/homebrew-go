@@ -1,0 +1,166 @@
+# GoReleaser configuration for Homebrew Go
+project_name: homebrew-go
+
+before:
+  hooks:
+    - go mod tidy
+    - go generate ./...
+
+builds:
+  - id: brew
+    binary: brew
+    main: ./cmd/brew
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    goarm:
+      - 7
+    ldflags:
+      - -s -w
+      - -X main.Version={{.Version}}
+      - -X main.GitCommit={{.FullCommit}}
+      - -X main.BuildDate={{.Date}}
+    flags:
+      - -trimpath
+
+archives:
+  - id: default
+    name_template: >-
+      {{ .ProjectName }}_
+      {{- title .Os }}_
+      {{- if eq .Arch "amd64" }}x86_64
+      {{- else if eq .Arch "386" }}i386
+      {{- else }}{{ .Arch }}{{ end }}
+      {{- if .Arm }}v{{ .Arm }}{{ end }}
+    format_overrides:
+      - goos: windows
+        format: zip
+    builds_info:
+      group: root
+      owner: root
+    files:
+      - README.md
+      - LICENSE.txt
+      - docs/**/*
+
+checksum:
+  name_template: 'checksums.txt'
+
+snapshot:
+  name_template: "{{ incpatch .Version }}-next"
+
+changelog:
+  sort: asc
+  use: github
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+      - '^ci:'
+      - '^chore:'
+      - Merge pull request
+      - Merge branch
+  groups:
+    - title: 'New Features'
+      regexp: '^.*?feat(\([[:word:]]+\))??!?:.+$'
+      order: 0
+    - title: 'Bug Fixes'
+      regexp: '^.*?fix(\([[:word:]]+\))??!?:.+$'
+      order: 1
+    - title: 'Performance Improvements'
+      regexp: '^.*?perf(\([[:word:]]+\))??!?:.+$'
+      order: 2
+    - title: 'Refactoring'
+      regexp: '^.*?refactor(\([[:word:]]+\))??!?:.+$'
+      order: 3
+    - title: 'Documentation'
+      regexp: '^.*?docs(\([[:word:]]+\))??!?:.+$'
+      order: 4
+    - title: 'Other'
+      order: 999
+
+dockers:
+  - image_templates:
+      - "ghcr.io/pilshchikov/homebrew-go:{{ .Tag }}"
+      - "ghcr.io/pilshchikov/homebrew-go:v{{ .Major }}"
+      - "ghcr.io/pilshchikov/homebrew-go:v{{ .Major }}.{{ .Minor }}"
+      - "ghcr.io/pilshchikov/homebrew-go:latest"
+    dockerfile: Dockerfile
+    build_flag_templates:
+      - "--pull"
+      - "--label=org.opencontainers.image.created={{.Date}}"
+      - "--label=org.opencontainers.image.name={{.ProjectName}}"
+      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+      - "--label=org.opencontainers.image.version={{.Version}}"
+      - "--label=org.opencontainers.image.source={{.GitURL}}"
+    extra_files:
+      - scripts/
+
+brews:
+  - name: homebrew-go
+    repository:
+      owner: pilshchikov
+      name: homebrew-go
+      branch: main
+    folder: Formula
+    homepage: https://github.com/pilshchikov/homebrew-go
+    description: "Homebrew Go - A complete rewrite of Homebrew from Ruby to Go"
+    license: BSD-2-Clause
+    test: |
+      system "#{bin}/brew", "--version"
+    dependencies:
+      - name: git
+      - name: curl
+    conflicts:
+      - brew
+
+release:
+  github:
+    owner: pilshchikov
+    name: homebrew-go
+  discussion_category_name: General
+  prerelease: auto
+  mode: replace
+  header: |
+    ## Homebrew {{ .Tag }} ({{ .Date }})
+
+    Welcome to this new release of Homebrew Go!
+
+  footer: |
+    ## Docker Images
+
+    - `ghcr.io/pilshchikov/homebrew-go:{{ .Tag }}`
+    - `ghcr.io/pilshchikov/homebrew-go:latest`
+
+    ## Installation
+
+    ```bash
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/pilshchikov/homebrew-go/main/install.sh)"
+    ```
+
+    ## Thanks
+
+    Thanks to all contributors who made this release possible!
+
+  extra_files:
+    - glob: ./docs/**/*
+    - glob: ./scripts/**/*
+
+milestones:
+  - close: true
+    fail_on_error: false
+    name_template: "{{ .Tag }}"
+
+announce:
+  mastodon:
+    enabled: true
+    message_template: 'Homebrew {{ .Tag }} is out! Check it out at {{ .ReleaseURL }}'
+  twitter:
+    enabled: true
+    message_template: 'Homebrew {{ .Tag }} is out! Check it out at {{ .ReleaseURL }}'

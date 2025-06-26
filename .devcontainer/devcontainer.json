@@ -1,0 +1,44 @@
+// For format details, see https://aka.ms/devcontainer.json.
+{
+  "name": "Homebrew Go",
+  "image": "mcr.microsoft.com/devcontainers/go:1.22-bullseye",
+  "workspaceFolder": "/workspaces/brew",
+  "onCreateCommand": ".devcontainer/on-create-command.sh",
+  "customizations": {
+    "vscode": {
+      // Installing all necessary extensions for Go development
+      "extensions": [
+        "golang.go",
+        "github.vscode-github-actions",
+        "ms-azuretools.vscode-docker",
+        "github.vscode-pull-request-github",
+        "davidanson.vscode-markdownlint",
+        "foxundermoon.shell-format",
+        "timonwong.shellcheck",
+        "ban.spellright",
+        "redhat.vscode-yaml",
+        "editorconfig.editorconfig",
+        "ms-vscode.test-adapter-converter",
+        "hbenl.vscode-test-explorer"
+      ],
+      "settings": {
+        "go.toolsManagement.autoUpdate": true,
+        "go.lintTool": "golangci-lint",
+        "go.lintOnSave": "package",
+        "go.formatTool": "goimports",
+        "go.useLanguageServer": true,
+        "go.buildOnSave": "package",
+        "go.vetOnSave": "package"
+      }
+    }
+  },
+  "remoteEnv": {
+    "HOMEBREW_GITHUB_API_TOKEN": "${localEnv:GITHUB_TOKEN}",
+    "HOMEBREW_NO_AUTO_UPDATE": "1"
+  },
+  "postCreateCommand": "go mod download && make dev-deps",
+  "features": {
+    "ghcr.io/devcontainers/features/git:1": {},
+    "ghcr.io/devcontainers/features/github-cli:1": {}
+  }
+}

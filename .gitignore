@@ -1,0 +1,129 @@
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+brew
+brew-*
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go coverage tool, specifically when used with LiteIDE
+*.out
+
+# Build directories
+build/
+dist/
+coverage/
+
+# Dependency directories
+vendor/
+
+# Go workspace file
+go.work
+
+# IDE and editor files
+.vscode/settings.json
+.vscode/launch.json
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+*.log
+
+# Runtime test files
+*.tmp
+
+# Homebrew-specific ignores
+# Homebrew installation directories
+Cellar/
+Caskroom/
+Frameworks/
+bin/
+etc/
+include/
+lib/
+opt/
+sbin/
+share/
+var/
+
+# Homebrew cache and temp files
+cache/
+tmp/
+locks/
+
+# API cache
+api_cache/
+
+# Taps
+Taps/
+PinnedTaps/
+
+# Configuration that might contain secrets
+.env
+.env.local
+
+# Keep specific configuration files
+!.editorconfig
+!.gitignore
+!.dockerignore
+!.shellcheckrc
+!.vale.ini
+!.golangci.yml
+!.goreleaser.yml
+
+# Keep documentation
+!README*.md
+!CHANGELOG.md
+!CONTRIBUTING.md
+!LICENSE.txt
+!CODEOWNERS
+
+# Keep configuration directories
+!.github/
+!.devcontainer/
+!.vscode/
+!.sublime/
+!completions/
+!docs/
+!manpages/
+
+# But ignore some generated files in those directories
+.vscode/*.log
+.sublime/homebrew.sublime-workspace
+docs/_site/
+docs/.jekyll-metadata/
+docs/tmp/
+docs/vendor/
+docs/Gemfile.lock
+
+# Keep source code and configuration
+!*.go
+!go.mod
+!go.sum
+!Makefile
+!Dockerfile*
+!*.yml
+!*.yaml
+!*.json
+!*.toml
+
+# Keep shell scripts
+!*.sh
+
+# Keep test files
+!*_test.go

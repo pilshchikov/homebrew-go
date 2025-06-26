@@ -1,0 +1,16 @@
+{
+  "recommendations": [
+    "golang.go",
+    "github.vscode-github-actions",
+    "ms-azuretools.vscode-docker",
+    "github.vscode-pull-request-github",
+    "davidanson.vscode-markdownlint",
+    "foxundermoon.shell-format",
+    "timonwong.shellcheck",
+    "ban.spellright",
+    "redhat.vscode-yaml",
+    "editorconfig.editorconfig",
+    "ms-vscode.test-adapter-converter",
+    "hbenl.vscode-test-explorer"
+  ]
+}

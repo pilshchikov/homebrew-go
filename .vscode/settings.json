@@ -1,0 +1,63 @@
+{
+  "search.exclude": {
+    "vendor/": true,
+    "node_modules/": true
+  },
+  "editor.insertSpaces": true,
+  "editor.tabSize": 4,
+  "editor.rulers": [
+    80,
+    120
+  ],
+  "files.encoding": "utf8",
+  "files.eol": "\n",
+  "files.trimTrailingWhitespace": true,
+  "files.insertFinalNewline": true,
+  "files.trimFinalNewlines": true,
+  "go.lintTool": "golangci-lint",
+  "go.lintOnSave": "package",
+  "go.formatTool": "goimports",
+  "go.useLanguageServer": true,
+  "go.buildOnSave": "package",
+  "go.vetOnSave": "package",
+  "go.testOnSave": false,
+  "go.coverOnSave": false,
+  "go.toolsManagement.autoUpdate": true,
+  "[go]": {
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": "explicit"
+    },
+    "editor.defaultFormatter": "golang.go"
+  },
+  "[go.mod]": {
+    "editor.formatOnSave": true
+  },
+  "[go.sum]": {
+    "editor.formatOnSave": false
+  },
+  "spellright.language": [
+    "en_GB",
+    "en_US"
+  ],
+  "spellright.documentTypes": [
+    "markdown"
+  ],
+  "shellcheck.customArgs": [
+    "--shell=bash",
+    "--enable=all",
+    "--external-sources"
+  ],
+  "shellformat.effectLanguages": [
+    "shellscript"
+  ],
+  "shellformat.flag": "-i 2 -ci -ln bash",
+  "[shellscript]": {
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.fixAll.shellcheck": "explicit"
+    }
+  },
+  "go.testFlags": ["-v"],
+  "go.coverMode": "atomic"
+}

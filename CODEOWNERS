@@ -1,0 +1,25 @@
+# Note that the naming of this file is incorrect for our case: these people do not "own" the provided files but are
+# people with write-access to this repository who wish to approve changes to these files.
+#
+# Their review is required to merge PRs that change these files.
+#
+# To be explicit: we will never accept changes to this file adding people from outside the Homebrew GitHub
+# organisation. If you are not a Homebrew maintainer: you do not personally "own" or "maintain" any files.
+
+# Core Go files
+*.go @Homebrew/maintainers
+go.mod @Homebrew/maintainers 
+go.sum @Homebrew/maintainers
+Makefile @Homebrew/maintainers
+
+# Configuration files
+.golangci.yml @Homebrew/maintainers
+.goreleaser.yml @Homebrew/maintainers
+Dockerfile @Homebrew/maintainers
+
+# CI/CD and development environment
+.github/ @Homebrew/maintainers
+.devcontainer/ @Homebrew/maintainers
+
+# Documentation
+docs/Support-Tiers.md @Homebrew/tsc @MikeMcQuaid

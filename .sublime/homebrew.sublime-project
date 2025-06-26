@@ -1,0 +1,59 @@
+{
+	"folders":
+	[
+		{
+			"//": "Homebrew Go Implementation Project",
+			"path": "..",
+			"folder_exclude_patterns": [
+				"Caskroom",
+				"Cellar",
+				"Frameworks",
+				"bin",
+				"etc",
+				"include",
+				"lib",
+				"opt",
+				"sbin",
+				"share",
+				"var",
+				"vendor",
+				"node_modules"
+			],
+			"file_exclude_patterns": [
+				"*.exe",
+				"brew"
+			],
+			"follow_symlinks": true
+		}
+	],
+    "settings": {
+        "tab_size": 4,
+        "translate_tabs_to_spaces": true,
+        "trim_trailing_white_space_on_save": true,
+        "ensure_newline_at_eof_on_save": true,
+        "rulers": [80, 120],
+        "default_encoding": "UTF-8",
+        "default_line_ending": "unix"
+    },
+    "build_systems":
+    [
+        {
+            "name": "Go Build",
+            "cmd": ["go", "build", "-o", "brew", "./cmd/brew"],
+            "working_dir": "${project_path}",
+            "shell": true
+        },
+        {
+            "name": "Go Test",
+            "cmd": ["go", "test", "./..."],
+            "working_dir": "${project_path}",
+            "shell": true
+        },
+        {
+            "name": "Go Test with Coverage",
+            "cmd": ["go", "test", "-cover", "./..."],
+            "working_dir": "${project_path}",
+            "shell": true
+        }
+    ]
+}

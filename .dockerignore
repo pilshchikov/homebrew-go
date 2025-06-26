@@ -1,0 +1,31 @@
+# Build artifacts
+brew
+*.exe
+*.test
+
+# Development files
+.git
+.github
+.vscode
+.sublime
+.idea
+
+# Go cache and modules
+vendor/
+go.sum
+
+# Temporary files
+*.tmp
+*.log
+
+# Test coverage
+coverage.*
+*.out
+
+# Documentation
+docs/
+*.md
+
+# OS files
+.DS_Store
+Thumbs.db

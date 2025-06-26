@@ -1,0 +1,32 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(make:*)",
+      "Bash(grep:*)",
+      "Bash(go build:*)",
+      "Bash(./brew install nonexistent-formula-12345)",
+      "Bash(./brew search hello)",
+      "Bash(./brew install hello --verbose)",
+      "Bash(go test:*)",
+      "Bash(./brew --version)",
+      "Bash(go run:*)",
+      "Bash(ls:*)",
+      "Bash(./bin/brew uninstall:*)",
+      "Bash(./bin/brew install:*)",
+      "Bash(/dev/null)",
+      "Bash(echo \"Exit code: $?\")",
+      "Bash(rg:*)",
+      "Bash(go tool cover:*)",
+      "Bash(find:*)",
+      "Bash(rm:*)",
+      "Bash(./brew-go:*)",
+      "Bash(diff:*)",
+      "Bash(mv:*)",
+      "Bash(./brew help)",
+      "Bash(./brew search:*)",
+      "Bash(./brew --help)",
+      "Bash(./brew commands)"
+    ],
+    "deny": []
+  }
+}

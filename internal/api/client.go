@@ -11,11 +11,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/homebrew/brew/internal/config"
-	"github.com/homebrew/brew/internal/cask"
-	"github.com/homebrew/brew/internal/formula"
-	"github.com/homebrew/brew/internal/logger"
-	"github.com/homebrew/brew/internal/utils"
+	"github.com/pilshchikov/homebrew-go/internal/config"
+	"github.com/pilshchikov/homebrew-go/internal/cask"
+	"github.com/pilshchikov/homebrew-go/internal/formula"
+	"github.com/pilshchikov/homebrew-go/internal/logger"
+	"github.com/pilshchikov/homebrew-go/internal/utils"
 )
 
 // Client handles API requests to Homebrew's official endpoints

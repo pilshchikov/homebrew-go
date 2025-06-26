@@ -11,9 +11,9 @@ import (
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
 
-	"github.com/homebrew/brew/internal/config"
-	"github.com/homebrew/brew/internal/formula"
-	"github.com/homebrew/brew/internal/logger"
+	"github.com/pilshchikov/homebrew-go/internal/config"
+	"github.com/pilshchikov/homebrew-go/internal/formula"
+	"github.com/pilshchikov/homebrew-go/internal/logger"
 )
 
 // Tap represents a Homebrew tap (third-party repository)

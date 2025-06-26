@@ -66,9 +66,13 @@ linters-settings:
     require-specific: false
 
   revive:
-    min-confidence: 0
+    confidence: 0.8
+    severity: warning
+    ignore-generated-header: true
+    enable-all-rules: false
     rules:
       - name: exported
+        severity: error
         arguments: [true]
 
   staticcheck:
@@ -107,6 +111,7 @@ linters:
     - nakedret
     - noctx
     - nolintlint
+    - revive
     - rowserrcheck
     - staticcheck
     - stylecheck

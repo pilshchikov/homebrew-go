@@ -14,8 +14,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/homebrew/brew/internal/errors"
-	"github.com/homebrew/brew/internal/logger"
+	"github.com/pilshchikov/homebrew-go/internal/errors"
+	"github.com/pilshchikov/homebrew-go/internal/logger"
 )
 
 // ChecksumType represents different checksum algorithms

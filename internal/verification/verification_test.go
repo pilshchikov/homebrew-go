@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 	
-	"github.com/homebrew/brew/internal/logger"
+	"github.com/pilshchikov/homebrew-go/internal/logger"
 )
 
 func TestNewVerifier(t *testing.T) {

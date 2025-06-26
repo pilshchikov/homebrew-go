@@ -5,10 +5,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/homebrew/brew/internal/config"
-	"github.com/homebrew/brew/internal/errors"
-	"github.com/homebrew/brew/internal/installer"
-	"github.com/homebrew/brew/internal/logger"
+	"github.com/pilshchikov/homebrew-go/internal/config"
+	"github.com/pilshchikov/homebrew-go/internal/errors"
+	"github.com/pilshchikov/homebrew-go/internal/installer"
+	"github.com/pilshchikov/homebrew-go/internal/logger"
 )
 
 func TestEnhancedErrorHandlingIntegration(t *testing.T) {

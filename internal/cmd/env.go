@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"runtime"
 
-	"github.com/homebrew/brew/internal/config"
+	"github.com/pilshchikov/homebrew-go/internal/config"
 	"github.com/spf13/cobra"
 )
 

@@ -8,8 +8,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/homebrew/brew/internal/config"
-	"github.com/homebrew/brew/internal/logger"
+	"github.com/pilshchikov/homebrew-go/internal/config"
+	"github.com/pilshchikov/homebrew-go/internal/logger"
 )
 
 func TestRunCleanup(t *testing.T) {

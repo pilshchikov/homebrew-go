@@ -13,9 +13,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/homebrew/brew/internal/config"
-	"github.com/homebrew/brew/internal/formula"
-	"github.com/homebrew/brew/internal/logger"
+	"github.com/pilshchikov/homebrew-go/internal/config"
+	"github.com/pilshchikov/homebrew-go/internal/formula"
+	"github.com/pilshchikov/homebrew-go/internal/logger"
 )
 
 func TestNewClient(t *testing.T) {

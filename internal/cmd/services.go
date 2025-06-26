@@ -1,8 +1,8 @@
 package cmd
 
 import (
-	"github.com/homebrew/brew/internal/config"
-	"github.com/homebrew/brew/internal/logger"
+	"github.com/pilshchikov/homebrew-go/internal/config"
+	"github.com/pilshchikov/homebrew-go/internal/logger"
 	"github.com/spf13/cobra"
 )
 

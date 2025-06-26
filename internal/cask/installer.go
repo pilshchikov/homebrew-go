@@ -7,10 +7,10 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/homebrew/brew/internal/config"
-	"github.com/homebrew/brew/internal/errors"
-	"github.com/homebrew/brew/internal/logger"
-	"github.com/homebrew/brew/internal/verification"
+	"github.com/pilshchikov/homebrew-go/internal/config"
+	"github.com/pilshchikov/homebrew-go/internal/errors"
+	"github.com/pilshchikov/homebrew-go/internal/logger"
+	"github.com/pilshchikov/homebrew-go/internal/verification"
 )
 
 // Installer handles installation of casks

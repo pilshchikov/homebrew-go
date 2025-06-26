@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/homebrew/brew/internal/config"
+	"github.com/pilshchikov/homebrew-go/internal/config"
 )
 
 func TestNewManager(t *testing.T) {

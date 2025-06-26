@@ -14,14 +14,14 @@ import (
 	"strings"
 	"time"
 
-	"github.com/homebrew/brew/internal/api"
-	"github.com/homebrew/brew/internal/cask"
-	"github.com/homebrew/brew/internal/config"
-	"github.com/homebrew/brew/internal/errors"
-	"github.com/homebrew/brew/internal/formula"
-	"github.com/homebrew/brew/internal/logger"
-	"github.com/homebrew/brew/internal/tap"
-	"github.com/homebrew/brew/internal/verification"
+	"github.com/pilshchikov/homebrew-go/internal/api"
+	"github.com/pilshchikov/homebrew-go/internal/cask"
+	"github.com/pilshchikov/homebrew-go/internal/config"
+	"github.com/pilshchikov/homebrew-go/internal/errors"
+	"github.com/pilshchikov/homebrew-go/internal/formula"
+	"github.com/pilshchikov/homebrew-go/internal/logger"
+	"github.com/pilshchikov/homebrew-go/internal/tap"
+	"github.com/pilshchikov/homebrew-go/internal/verification"
 )
 
 // progressReader wraps an io.Reader to show download progress

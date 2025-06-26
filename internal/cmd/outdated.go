@@ -8,9 +8,9 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/homebrew/brew/internal/api"
-	"github.com/homebrew/brew/internal/config"
-	"github.com/homebrew/brew/internal/logger"
+	"github.com/pilshchikov/homebrew-go/internal/api"
+	"github.com/pilshchikov/homebrew-go/internal/config"
+	"github.com/pilshchikov/homebrew-go/internal/logger"
 	"github.com/spf13/cobra"
 )
 

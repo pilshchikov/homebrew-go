@@ -6,11 +6,11 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/homebrew/brew/internal/api"
-	"github.com/homebrew/brew/internal/config"
-	"github.com/homebrew/brew/internal/errors"
-	"github.com/homebrew/brew/internal/formula"
-	"github.com/homebrew/brew/internal/logger"
+	"github.com/pilshchikov/homebrew-go/internal/api"
+	"github.com/pilshchikov/homebrew-go/internal/config"
+	"github.com/pilshchikov/homebrew-go/internal/errors"
+	"github.com/pilshchikov/homebrew-go/internal/formula"
+	"github.com/pilshchikov/homebrew-go/internal/logger"
 	"github.com/spf13/cobra"
 )
 

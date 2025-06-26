@@ -5,6 +5,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/spf13/cobra"
 	"github.com/pilshchikov/homebrew-go/internal/config"
 	"github.com/pilshchikov/homebrew-go/internal/logger"
 )

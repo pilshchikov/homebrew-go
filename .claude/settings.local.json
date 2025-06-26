@@ -25,7 +25,9 @@
       "Bash(./brew help)",
       "Bash(./brew search:*)",
       "Bash(./brew --help)",
-      "Bash(./brew commands)"
+      "Bash(./brew commands)",
+      "Bash(golangci-lint help:*)",
+      "Bash(golangci-lint run:*)"
     ],
     "deny": []
   }

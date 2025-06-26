@@ -5,8 +5,8 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/homebrew/brew/internal/config"
-	"github.com/homebrew/brew/internal/logger"
+	"github.com/pilshchikov/homebrew-go/internal/config"
+	"github.com/pilshchikov/homebrew-go/internal/logger"
 )
 
 // NewHomeCmd creates the home command (opens formula homepage)

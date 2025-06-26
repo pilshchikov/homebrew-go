@@ -37,13 +37,13 @@ func NewInstallCmd(cfg *config.Config) *cobra.Command {
 		Short: "Install a formula or cask",
 		Long: `Install one or more formulae or casks.
 
-Unless HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK is set, brew upgrade or brew reinstall 
+Unless HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK is set, brew upgrade or brew reinstall
 will be run for outdated dependents and dependents with broken linkage, respectively.
 
-Unless HOMEBREW_NO_INSTALL_CLEANUP is set, brew cleanup will then be run for 
+Unless HOMEBREW_NO_INSTALL_CLEANUP is set, brew cleanup will then be run for
 the installed formulae or, every 30 days, for all formulae.
 
-Unless HOMEBREW_NO_INSTALL_UPGRADE is set, brew install <formula> will upgrade 
+Unless HOMEBREW_NO_INSTALL_UPGRADE is set, brew install <formula> will upgrade
 <formula> if it is already installed but outdated.`,
 		Args: cobra.MinimumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {

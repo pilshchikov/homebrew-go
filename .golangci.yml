@@ -6,15 +6,15 @@ run:
   modules-download-mode: readonly
 
 output:
-  format: colored-line-number
+  formats:
+    - format: colored-line-number
   print-issued-lines: true
   print-linter-name: true
-  uniq-by-line: true
   sort-results: true
 
 linters-settings:
   govet:
-    check-shadowing: true
+    enable-all: true
     settings:
       printf:
         funcs:
@@ -22,6 +22,8 @@ linters-settings:
           - (github.com/pilshchikov/homebrew-go/internal/logger).Info
           - (github.com/pilshchikov/homebrew-go/internal/logger).Warn
           - (github.com/pilshchikov/homebrew-go/internal/logger).Error
+      shadow:
+        strict: false
 
   gocyclo:
     min-complexity: 15
@@ -60,7 +62,6 @@ linters-settings:
     locale: US
 
   nolintlint:
-    allow-leading-space: true
     allow-unused: false
     require-explanation: false
     require-specific: false
@@ -73,7 +74,7 @@ linters-settings:
     rules:
       - name: exported
         severity: error
-        arguments: [true]
+        arguments: ["checkPrivateReceivers"]
 
   staticcheck:
     checks: ["all"]

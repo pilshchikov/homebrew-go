@@ -118,12 +118,3 @@ release:
     Download from: https://github.com/pilshchikov/homebrew-go/releases/download/{{ .Tag }}/
 
     Built: {{ .Date }} | {{ .ShortCommit }}
-
-
-milestones:
-  - close: true
-    fail_on_error: false
-    name_template: "{{ .Tag }}"
-
-announce:
-  skip: "{{gt .Prerelease 1}}"

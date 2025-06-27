@@ -86,22 +86,6 @@ changelog:
     - title: 'Other'
       order: 999
 
-dockers:
-  - image_templates:
-      - "ghcr.io/pilshchikov/homebrew-go:{{ .Tag }}"
-      - "ghcr.io/pilshchikov/homebrew-go:v{{ .Major }}"
-      - "ghcr.io/pilshchikov/homebrew-go:v{{ .Major }}.{{ .Minor }}"
-      - "ghcr.io/pilshchikov/homebrew-go:latest"
-    dockerfile: Dockerfile
-    build_flag_templates:
-      - "--pull"
-      - "--label=org.opencontainers.image.created={{.Date}}"
-      - "--label=org.opencontainers.image.name={{.ProjectName}}"
-      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
-      - "--label=org.opencontainers.image.version={{.Version}}"
-      - "--label=org.opencontainers.image.source={{.GitURL}}"
-    extra_files:
-      - scripts/
 
 
 release:
@@ -120,19 +104,24 @@ release:
     This is an automated release of Homebrew Go.
 
   footer: |
-    ## 🐳 Docker Images
-
-    - `ghcr.io/pilshchikov/homebrew-go:{{ .Tag }}`
-    - `ghcr.io/pilshchikov/homebrew-go:latest`
-
     ## 📦 Installation
 
+    ### Download Binary Directly
     ```bash
-    # Download binary directly
+    # macOS (Intel)
     curl -L https://github.com/pilshchikov/homebrew-go/releases/download/{{ .Tag }}/homebrew-go_Darwin_x86_64.tar.gz | tar xz
     
-    # Or use Docker
-    docker run ghcr.io/pilshchikov/homebrew-go:{{ .Tag }} --version
+    # macOS (Apple Silicon)
+    curl -L https://github.com/pilshchikov/homebrew-go/releases/download/{{ .Tag }}/homebrew-go_Darwin_arm64.tar.gz | tar xz
+    
+    # Linux (x86_64)
+    curl -L https://github.com/pilshchikov/homebrew-go/releases/download/{{ .Tag }}/homebrew-go_Linux_x86_64.tar.gz | tar xz
+    ```
+
+    ### Install via Package Manager
+    ```bash
+    # Install from source with Go
+    go install github.com/pilshchikov/homebrew-go/cmd/brew@{{ .Tag }}
     ```
 
     ## ✨ Automatic Build System

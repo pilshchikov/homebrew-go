@@ -36,7 +36,9 @@
       "Bash($HOME/go/bin/gosec:*)",
       "Bash($HOME/go/bin/goreleaser check:*)",
       "Bash($HOME/go/bin/goreleaser:*)",
-      "WebFetch(domain:goreleaser.com)"
+      "WebFetch(domain:goreleaser.com)",
+      "Bash(docker build:*)",
+      "Bash(docker run:*)"
     ],
     "deny": []
   }

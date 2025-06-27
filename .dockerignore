@@ -12,7 +12,6 @@ brew
 
 # Go cache and modules
 vendor/
-go.sum
 
 # Temporary files
 *.tmp

@@ -106,7 +106,7 @@ release:
   footer: >
     ## Installation Options
 
-    ### Quick Install (Default: brew-go)
+    ### Quick Install
 
     ```bash
 
@@ -126,7 +126,7 @@ release:
 
     Download from: https://github.com/pilshchikov/homebrew-go/releases/download/{{ .Tag }}/
 
-    Built: {{ .Date | date "2006-01-02" }} | {{ .ShortCommit }}
+    Built: {{ .Date }} | {{ .ShortCommit }}
 
 
 milestones:

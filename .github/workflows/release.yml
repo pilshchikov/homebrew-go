@@ -35,15 +35,20 @@ jobs:
     - name: Generate version
       id: version
       run: |
-        # Generate version in format YYYY.M.DD.BUILD_ID
+        # Generate semantic version in format vMAJOR.MINOR.PATCH
         YEAR=$(date +%Y)
         MONTH=$(date +%-m)  # No leading zero
         DAY=$(date +%d)
         BUILD_ID=${{ github.run_number }}
-        VERSION="${YEAR}.${MONTH}.${DAY}.${BUILD_ID}"
+        
+        # Convert to semver: v<year-2024>.<month><day>.<build_id>
+        MAJOR=$((YEAR - 2024))  # Start from 1 for 2025
+        MINOR=$((MONTH * 100 + DAY))  # e.g., 627 for June 27th
+        PATCH=$BUILD_ID
+        VERSION="v${MAJOR}.${MINOR}.${PATCH}"
         
         echo "version=$VERSION" >> $GITHUB_OUTPUT
-        echo "Generated version: $VERSION"
+        echo "Generated semantic version: $VERSION"
 
     - name: Clean test cache
       run: go clean -testcache

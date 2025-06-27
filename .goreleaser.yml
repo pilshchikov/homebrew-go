@@ -137,11 +137,12 @@ release:
 
     ## ✨ Automatic Build System
 
-    This release was automatically generated with version `{{ .Tag }}` based on:
-    - **Year:** {{ .Date | date "2006" }}
-    - **Month:** {{ .Date | date "1" }}  
-    - **Day:** {{ .Date | date "02" }}
-    - **Build:** {{ .Env.GITHUB_RUN_NUMBER }}
+    This release was automatically generated with semantic version `{{ .Tag }}`.
+    
+    **Build Details:**
+    - **Date:** {{ .Date | date "2006-01-02" }}
+    - **Commit:** {{ .ShortCommit }}
+    - **Build Number:** {{ .Env.GITHUB_RUN_NUMBER }}
 
   extra_files:
     - glob: ./docs/**/*

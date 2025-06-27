@@ -37,19 +37,19 @@ func TestInit(t *testing.T) {
 func TestLogging(t *testing.T) {
 	// Capture log output
 	var debugBuf, infoBuf, warnBuf, errorBuf bytes.Buffer
-	
+
 	// Save original loggers
 	origDebug := debugLogger
 	origInfo := infoLogger
 	origWarn := warnLogger
 	origError := errorLogger
-	
+
 	// Set test loggers
 	debugLogger = log.New(&debugBuf, "[DEBUG] ", log.LstdFlags|log.Lshortfile)
 	infoLogger = log.New(&infoBuf, "", 0)
 	warnLogger = log.New(&warnBuf, "Warning: ", 0)
 	errorLogger = log.New(&errorBuf, "Error: ", 0)
-	
+
 	// Restore original loggers after test
 	defer func() {
 		debugLogger = origDebug
@@ -81,16 +81,16 @@ func TestLogging(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			currentLevel = tt.level
 			tt.buffer.Reset()
-			
+
 			tt.logFunc(tt.message)
-			
+
 			output := tt.buffer.String()
 			hasOutput := len(output) > 0
-			
+
 			if hasOutput != tt.shouldLog {
 				t.Errorf("Expected shouldLog=%v, got hasOutput=%v", tt.shouldLog, hasOutput)
 			}
-			
+
 			if tt.shouldLog && !strings.Contains(output, tt.message) {
 				t.Errorf("Expected message %q in output %q", tt.message, output)
 			}
@@ -100,28 +100,28 @@ func TestLogging(t *testing.T) {
 
 func TestProgressAndStep(t *testing.T) {
 	var buf bytes.Buffer
-	
+
 	// Save original logger
 	origInfo := infoLogger
 	infoLogger = log.New(&buf, "", 0)
-	
+
 	defer func() {
 		infoLogger = origInfo
 	}()
-	
+
 	currentLevel = InfoLevel
-	
+
 	Progress("Installing package")
 	output := buf.String()
-	
+
 	if !strings.Contains(output, "==> Installing package") {
 		t.Errorf("Progress() output %q should contain '==> Installing package'", output)
 	}
-	
+
 	buf.Reset()
 	Step("Downloading source")
 	output = buf.String()
-	
+
 	if !strings.Contains(output, "  - Downloading source") {
 		t.Errorf("Step() output %q should contain '  - Downloading source'", output)
 	}
@@ -129,20 +129,20 @@ func TestProgressAndStep(t *testing.T) {
 
 func TestCmd(t *testing.T) {
 	var buf bytes.Buffer
-	
+
 	// Save original logger
 	origInfo := infoLogger
 	infoLogger = log.New(&buf, "", 0)
-	
+
 	defer func() {
 		infoLogger = origInfo
 	}()
-	
+
 	currentLevel = InfoLevel
-	
+
 	Cmd("make install")
 	output := buf.String()
-	
+
 	if !strings.Contains(output, "$ make install") {
 		t.Errorf("Cmd() output %q should contain '$ make install'", output)
 	}
@@ -150,38 +150,38 @@ func TestCmd(t *testing.T) {
 
 func TestTimer(t *testing.T) {
 	var buf bytes.Buffer
-	
+
 	// Save original logger
 	origInfo := infoLogger
 	infoLogger = log.New(&buf, "", 0)
-	
+
 	defer func() {
 		infoLogger = origInfo
 	}()
-	
+
 	currentLevel = InfoLevel
-	
+
 	timer := NewTimer("test operation")
 	if timer.name != "test operation" {
 		t.Errorf("NewTimer() name = %v, want %v", timer.name, "test operation")
 	}
-	
+
 	// Sleep for a short time to ensure duration > 0
 	time.Sleep(10 * time.Millisecond)
-	
+
 	timer.Stop()
 	output := buf.String()
-	
+
 	if !strings.Contains(output, "test operation took") {
 		t.Errorf("Timer.Stop() output %q should contain 'test operation took'", output)
 	}
-	
+
 	buf.Reset()
 	timer2 := NewTimer("another operation")
 	time.Sleep(10 * time.Millisecond)
 	timer2.StopWithResult("completed successfully")
 	output = buf.String()
-	
+
 	if !strings.Contains(output, "another operation completed successfully") {
 		t.Errorf("Timer.StopWithResult() output %q should contain 'another operation completed successfully'", output)
 	}
@@ -189,39 +189,39 @@ func TestTimer(t *testing.T) {
 
 func TestColoredOutput(t *testing.T) {
 	var buf bytes.Buffer
-	
+
 	// Save original logger
 	origInfo := infoLogger
 	origError := errorLogger
 	infoLogger = log.New(&buf, "", 0)
 	errorLogger = log.New(&buf, "", 0)
-	
+
 	defer func() {
 		infoLogger = origInfo
 		errorLogger = origError
 	}()
-	
+
 	currentLevel = InfoLevel
-	
+
 	Success("Operation completed")
 	output := buf.String()
-	
+
 	if !strings.Contains(output, "Operation completed") {
 		t.Errorf("Success() output should contain the message")
 	}
-	
+
 	if !strings.Contains(output, "\033[32m") || !strings.Contains(output, "\033[0m") {
 		t.Errorf("Success() output should contain color codes")
 	}
-	
+
 	buf.Reset()
 	Failure("Operation failed")
 	output = buf.String()
-	
+
 	if !strings.Contains(output, "Operation failed") {
 		t.Errorf("Failure() output should contain the message")
 	}
-	
+
 	if !strings.Contains(output, "\033[31m") || !strings.Contains(output, "\033[0m") {
 		t.Errorf("Failure() output should contain color codes")
 	}
@@ -284,32 +284,32 @@ func (l LogLevel) String() string {
 
 func TestLogDetailedError(t *testing.T) {
 	var buf bytes.Buffer
-	
+
 	// Save original logger
 	origError := errorLogger
 	errorLogger = log.New(&buf, "", 0)
-	
+
 	defer func() {
 		errorLogger = origError
 	}()
-	
+
 	currentLevel = ErrorLevel
-	
+
 	ctx := ErrorContext{
-		Operation:   "installation",
-		Formula:     "test-formula",
-		Version:     "1.0.0",
-		Platform:    "arm64_sequoia",
-		Error:       fmt.Errorf("network timeout"),
+		Operation: "installation",
+		Formula:   "test-formula",
+		Version:   "1.0.0",
+		Platform:  "arm64_sequoia",
+		Error:     fmt.Errorf("network timeout"),
 		Suggestions: []string{
 			"Check your internet connection",
 			"Try again later",
 		},
 	}
-	
+
 	LogDetailedError(ctx)
 	output := buf.String()
-	
+
 	// Check all components are present
 	expectedComponents := []string{
 		"Error: installation failed",
@@ -321,7 +321,7 @@ func TestLogDetailedError(t *testing.T) {
 		"Check your internet connection",
 		"Try again later",
 	}
-	
+
 	for _, component := range expectedComponents {
 		if !strings.Contains(output, component) {
 			t.Errorf("LogDetailedError() output should contain %q, got: %q", component, output)
@@ -351,7 +351,7 @@ func TestConfirm(t *testing.T) {
 			// For now, we'll test the logic by calling the helper directly
 			response := strings.ToLower(strings.TrimSpace(tt.input))
 			result := response == "y" || response == "yes"
-			
+
 			if result != tt.expected {
 				t.Errorf("Confirm logic for input %q = %v, want %v", tt.input, result, tt.expected)
 			}

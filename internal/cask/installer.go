@@ -161,29 +161,29 @@ func (ci *Installer) downloadFile(url, path string) error {
 	// This is a simplified download - in practice would use the same
 	// download logic as the main installer with progress tracking
 	cmd := exec.Command("curl", "-L", "-o", path, url)
-	
+
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		return errors.NewDownloadError("download", url, fmt.Errorf("curl failed: %s", string(output)))
 	}
-	
+
 	return nil
 }
 
 // extractCask extracts the downloaded cask if needed
 func (ci *Installer) extractCask(cask *Cask, downloadPath string) (string, error) {
 	ext := cask.GetFileExtension()
-	
+
 	// For some formats, we don't need extraction
 	if ext == ".pkg" {
 		return downloadPath, nil
 	}
-	
+
 	extractDir := filepath.Join(ci.config.HomebrewCache, "cask", "extract", cask.Token)
 	if err := os.MkdirAll(extractDir, 0755); err != nil {
 		return "", errors.NewPermissionError("create extract directory", extractDir, err)
 	}
-	
+
 	switch ext {
 	case ".dmg":
 		return ci.extractDMG(downloadPath, extractDir)
@@ -200,13 +200,13 @@ func (ci *Installer) extractCask(cask *Cask, downloadPath string) (string, error
 // extractDMG mounts and extracts a DMG file
 func (ci *Installer) extractDMG(dmgPath, extractDir string) (string, error) {
 	logger.Step("Mounting DMG")
-	
+
 	// Mount the DMG
 	cmd := exec.Command("hdiutil", "attach", "-quiet", "-nobrowse", "-mountpoint", extractDir, dmgPath)
 	if err := cmd.Run(); err != nil {
 		return "", fmt.Errorf("failed to mount DMG: %w", err)
 	}
-	
+
 	// Note: In a real implementation, we'd need to handle unmounting
 	// and proper cleanup of the mount point
 	return extractDir, nil
@@ -215,19 +215,19 @@ func (ci *Installer) extractDMG(dmgPath, extractDir string) (string, error) {
 // extractZip extracts a ZIP file
 func (ci *Installer) extractZip(zipPath, extractDir string) (string, error) {
 	logger.Step("Extracting ZIP")
-	
+
 	cmd := exec.Command("unzip", "-q", "-d", extractDir, zipPath)
 	if err := cmd.Run(); err != nil {
 		return "", fmt.Errorf("failed to extract ZIP: %w", err)
 	}
-	
+
 	return extractDir, nil
 }
 
 // extractTar extracts a tar archive
 func (ci *Installer) extractTar(tarPath, extractDir string) (string, error) {
 	logger.Step("Extracting tar archive")
-	
+
 	var cmd *exec.Cmd
 	if strings.HasSuffix(tarPath, ".tar.gz") {
 		cmd = exec.Command("tar", "-xzf", tarPath, "-C", extractDir)
@@ -238,11 +238,11 @@ func (ci *Installer) extractTar(tarPath, extractDir string) (string, error) {
 	} else {
 		return "", fmt.Errorf("unsupported tar format: %s", tarPath)
 	}
-	
+
 	if err := cmd.Run(); err != nil {
 		return "", fmt.Errorf("failed to extract tar: %w", err)
 	}
-	
+
 	return extractDir, nil
 }
 
@@ -251,10 +251,10 @@ func (ci *Installer) installArtifacts(cask *Cask, sourcePath string, opts *CaskI
 	if len(cask.Artifacts) == 0 {
 		return nil, fmt.Errorf("no artifacts to install")
 	}
-	
+
 	artifacts := cask.Artifacts[0]
 	installed := []string{}
-	
+
 	// Install applications
 	for _, app := range artifacts.App {
 		if err := ci.installApp(app, sourcePath, opts); err != nil {
@@ -262,7 +262,7 @@ func (ci *Installer) installArtifacts(cask *Cask, sourcePath string, opts *CaskI
 		}
 		installed = append(installed, app.Target)
 	}
-	
+
 	// Install binaries
 	for _, binary := range artifacts.Binary {
 		if err := ci.installBinary(binary, sourcePath, opts); err != nil {
@@ -270,7 +270,7 @@ func (ci *Installer) installArtifacts(cask *Cask, sourcePath string, opts *CaskI
 		}
 		installed = append(installed, binary.Target)
 	}
-	
+
 	// Install packages
 	for _, pkg := range artifacts.Pkg {
 		if err := ci.installPkg(pkg, sourcePath, opts); err != nil {
@@ -278,7 +278,7 @@ func (ci *Installer) installArtifacts(cask *Cask, sourcePath string, opts *CaskI
 		}
 		installed = append(installed, pkg)
 	}
-	
+
 	// Handle installers
 	for _, installer := range artifacts.Installer {
 		if err := ci.runInstaller(installer, sourcePath, opts); err != nil {
@@ -286,88 +286,88 @@ func (ci *Installer) installArtifacts(cask *Cask, sourcePath string, opts *CaskI
 		}
 		installed = append(installed, "installer")
 	}
-	
+
 	return installed, nil
 }
 
 // installApp installs an application bundle
 func (ci *Installer) installApp(app CaskApp, sourcePath string, opts *CaskInstallOptions) error {
 	sourcePath = filepath.Join(sourcePath, app.Source)
-	
+
 	target := app.Target
 	if target == "" {
-		target = filepath.Join("/Applications", filepath.Base(app.Source))
+		target = filepath.Join(string(filepath.Separator)+"Applications", filepath.Base(app.Source))
 	} else if !filepath.IsAbs(target) {
-		target = filepath.Join("/Applications", target)
+		target = filepath.Join(string(filepath.Separator)+"Applications", target)
 	}
-	
+
 	logger.Step("Installing app: %s → %s", app.Source, target)
-	
+
 	if opts.DryRun {
 		return nil
 	}
-	
+
 	// Check if target already exists
 	if _, err := os.Stat(target); err == nil && !opts.Force {
 		return fmt.Errorf("application already exists at %s", target)
 	}
-	
+
 	// Copy the application
 	cmd := exec.Command("cp", "-R", sourcePath, target)
 	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("failed to copy application: %w", err)
 	}
-	
+
 	// Remove quarantine attribute if requested
 	if opts.NoQuarantine {
 		cmd = exec.Command("xattr", "-dr", "com.apple.quarantine", target)
-		cmd.Run() // Ignore errors for this step
+		_ = cmd.Run() // Ignore errors for this step
 	}
-	
+
 	return nil
 }
 
 // installBinary installs a binary symlink
 func (ci *Installer) installBinary(binary CaskBinary, sourcePath string, opts *CaskInstallOptions) error {
 	sourcePath = filepath.Join(sourcePath, binary.Source)
-	
+
 	target := binary.Target
 	if target == "" {
-		target = filepath.Join("/usr/local/bin", filepath.Base(binary.Source))
+		target = filepath.Join(filepath.Join(string(filepath.Separator)+"usr", "local", "bin"), filepath.Base(binary.Source))
 	} else if !filepath.IsAbs(target) {
-		target = filepath.Join("/usr/local/bin", target)
+		target = filepath.Join(filepath.Join(string(filepath.Separator)+"usr", "local", "bin"), target)
 	}
-	
+
 	logger.Step("Installing binary: %s → %s", binary.Source, target)
-	
+
 	if opts.DryRun {
 		return nil
 	}
-	
+
 	// Create symlink
 	if err := os.Symlink(sourcePath, target); err != nil {
 		return fmt.Errorf("failed to create binary symlink: %w", err)
 	}
-	
+
 	return nil
 }
 
 // installPkg installs a package file
 func (ci *Installer) installPkg(pkg, sourcePath string, opts *CaskInstallOptions) error {
 	pkgPath := filepath.Join(sourcePath, pkg)
-	
+
 	logger.Step("Installing package: %s", pkg)
-	
+
 	if opts.DryRun {
 		return nil
 	}
-	
+
 	// Install the package using installer command
 	cmd := exec.Command("sudo", "installer", "-pkg", pkgPath, "-target", "/")
 	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("failed to install package: %w", err)
 	}
-	
+
 	return nil
 }
 
@@ -377,19 +377,19 @@ func (ci *Installer) runInstaller(installer CaskInstaller, sourcePath string, op
 		logger.Info("Manual installation required: %s", installer.Manual)
 		return nil
 	}
-	
+
 	// Handle script-based installers
 	if installer.Script != nil {
 		logger.Step("Running installer script")
-		
+
 		if opts.DryRun {
 			return nil
 		}
-		
+
 		// This would need more complex implementation based on script type
 		logger.Warn("Script-based installers not fully implemented")
 	}
-	
+
 	return nil
 }
 
@@ -399,7 +399,7 @@ func (ci *Installer) createInstallReceipt(cask *Cask) error {
 	if err := os.MkdirAll(receiptDir, 0755); err != nil {
 		return err
 	}
-	
+
 	receiptPath := filepath.Join(receiptDir, ".metadata")
 	receiptData := fmt.Sprintf(`{
   "token": "%s",
@@ -408,22 +408,22 @@ func (ci *Installer) createInstallReceipt(cask *Cask) error {
   "installed_on": "%s",
   "installed_by": "brew-go"
 }`, cask.Token, cask.Name, cask.Version, fmt.Sprintf("%d", os.Getpid()))
-	
-	return os.WriteFile(receiptPath, []byte(receiptData), 0644)
+
+	return os.WriteFile(receiptPath, []byte(receiptData), 0600)
 }
 
 // UninstallCask uninstalls a cask
 func (ci *Installer) UninstallCask(cask *Cask, opts *CaskInstallOptions) error {
 	logger.PrintHeader(fmt.Sprintf("Uninstalling Cask: %s", cask.Token))
-	
+
 	if !cask.IsInstalled() {
 		return fmt.Errorf("cask %s is not installed", cask.Token)
 	}
-	
+
 	if len(cask.Artifacts) > 0 && len(cask.Artifacts[0].Uninstall) > 0 {
 		return ci.runUninstallSteps(cask.Artifacts[0].Uninstall, opts)
 	}
-	
+
 	// Default uninstall - remove applications
 	return ci.removeDefaultArtifacts(cask, opts)
 }
@@ -435,31 +435,31 @@ func (ci *Installer) runUninstallSteps(uninstalls []CaskUninstall, opts *CaskIns
 		for _, path := range uninstall.Delete {
 			logger.Step("Deleting: %s", path)
 			if !opts.DryRun {
-				os.RemoveAll(path)
+				_ = os.RemoveAll(path)
 			}
 		}
-		
+
 		// Move to trash
 		for _, path := range uninstall.Trash {
 			logger.Step("Moving to trash: %s", path)
 			if !opts.DryRun {
 				// This would need integration with macOS trash system
-				os.RemoveAll(path)
+				_ = os.RemoveAll(path)
 			}
 		}
-		
+
 		// Remove directories
 		for _, path := range uninstall.Rmdir {
 			logger.Step("Removing directory: %s", path)
 			if !opts.DryRun {
-				os.Remove(path)
+				_ = os.Remove(path)
 			}
 		}
-		
+
 		// Handle other uninstall steps (pkgutil, signals, etc.)
 		// This would need more implementation
 	}
-	
+
 	return nil
 }
 
@@ -468,34 +468,34 @@ func (ci *Installer) removeDefaultArtifacts(cask *Cask, opts *CaskInstallOptions
 	if len(cask.Artifacts) == 0 {
 		return nil
 	}
-	
+
 	artifacts := cask.Artifacts[0]
-	
+
 	// Remove applications
 	for _, app := range artifacts.App {
 		target := app.Target
 		if target == "" {
-			target = filepath.Join("/Applications", filepath.Base(app.Source))
+			target = filepath.Join(string(filepath.Separator)+"Applications", filepath.Base(app.Source))
 		}
-		
+
 		logger.Step("Removing application: %s", target)
 		if !opts.DryRun {
-			os.RemoveAll(target)
+			_ = os.RemoveAll(target)
 		}
 	}
-	
+
 	// Remove binaries
 	for _, binary := range artifacts.Binary {
 		target := binary.Target
 		if target == "" {
-			target = filepath.Join("/usr/local/bin", filepath.Base(binary.Source))
+			target = filepath.Join(filepath.Join(string(filepath.Separator)+"usr", "local", "bin"), filepath.Base(binary.Source))
 		}
-		
+
 		logger.Step("Removing binary: %s", target)
 		if !opts.DryRun {
-			os.Remove(target)
+			_ = os.Remove(target)
 		}
 	}
-	
+
 	return nil
 }

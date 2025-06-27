@@ -67,7 +67,7 @@ func TestRunPinWithArgs(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
-	defer os.RemoveAll(tempDir)
+	defer func() { _ = os.RemoveAll(tempDir) }()
 
 	cfg := &config.Config{
 		HomebrewCellar:  filepath.Join(tempDir, "Cellar"),
@@ -76,14 +76,14 @@ func TestRunPinWithArgs(t *testing.T) {
 
 	// Create cellar with installed formula
 	cellarDir := cfg.HomebrewCellar
-	os.MkdirAll(cellarDir, 0755)
+	_ = os.MkdirAll(cellarDir, 0755)
 
 	formulaDir := filepath.Join(cellarDir, "test-formula")
 	versionDir := filepath.Join(formulaDir, "1.0.0")
-	os.MkdirAll(versionDir, 0755)
+	_ = os.MkdirAll(versionDir, 0755)
 
 	// Create library directory
-	os.MkdirAll(cfg.HomebrewLibrary, 0755)
+	_ = os.MkdirAll(cfg.HomebrewLibrary, 0755)
 
 	err = runPin(cfg, []string{"test-formula"})
 	if err != nil {
@@ -107,7 +107,7 @@ func TestRunUnpinWithArgs(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
-	defer os.RemoveAll(tempDir)
+	defer func() { _ = os.RemoveAll(tempDir) }()
 
 	cfg := &config.Config{
 		HomebrewLibrary: filepath.Join(tempDir, "Library"),
@@ -115,11 +115,11 @@ func TestRunUnpinWithArgs(t *testing.T) {
 
 	// Create library and pin directories
 	pinDir := filepath.Join(cfg.HomebrewLibrary, "PinnedKegs")
-	os.MkdirAll(pinDir, 0755)
+	_ = os.MkdirAll(pinDir, 0755)
 
 	// Create pin file
 	pinFile := filepath.Join(pinDir, "test-formula")
-	os.WriteFile(pinFile, []byte("pinned"), 0644)
+	_ = os.WriteFile(pinFile, []byte("pinned"), 0644)
 
 	err = runUnpin(cfg, []string{"test-formula"})
 	if err != nil {
@@ -140,14 +140,14 @@ func TestRunPinNotInstalled(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
-	defer os.RemoveAll(tempDir)
+	defer func() { _ = os.RemoveAll(tempDir) }()
 
 	cfg := &config.Config{
 		HomebrewCellar: filepath.Join(tempDir, "Cellar"),
 	}
 
 	// Create empty cellar
-	os.MkdirAll(cfg.HomebrewCellar, 0755)
+	_ = os.MkdirAll(cfg.HomebrewCellar, 0755)
 
 	err = runPin(cfg, []string{"non-existent-formula"})
 	if err == nil {
@@ -163,14 +163,14 @@ func TestRunUnpinNotPinned(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
-	defer os.RemoveAll(tempDir)
+	defer func() { _ = os.RemoveAll(tempDir) }()
 
 	cfg := &config.Config{
 		HomebrewLibrary: filepath.Join(tempDir, "Library"),
 	}
 
 	// Create library directory but no pin
-	os.MkdirAll(cfg.HomebrewLibrary, 0755)
+	_ = os.MkdirAll(cfg.HomebrewLibrary, 0755)
 
 	err = runUnpin(cfg, []string{"unpinned-formula"})
 	if err == nil {
@@ -186,7 +186,7 @@ func TestCreatePinFile(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
-	defer os.RemoveAll(tempDir)
+	defer func() { _ = os.RemoveAll(tempDir) }()
 
 	pinFile := filepath.Join(tempDir, "test-formula")
 
@@ -209,11 +209,11 @@ func TestRemovePinFile(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
-	defer os.RemoveAll(tempDir)
+	defer func() { _ = os.RemoveAll(tempDir) }()
 
 	// Create pin file
 	pinFile := filepath.Join(tempDir, "test-formula")
-	os.WriteFile(pinFile, []byte("pinned"), 0644)
+	_ = os.WriteFile(pinFile, []byte("pinned"), 0644)
 
 	err = os.Remove(pinFile)
 	if err != nil {
@@ -244,7 +244,7 @@ func TestIsFormulaInstalledPin(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
-	defer os.RemoveAll(tempDir)
+	defer func() { _ = os.RemoveAll(tempDir) }()
 
 	cfg = &config.Config{
 		HomebrewCellar: tempDir,
@@ -253,7 +253,7 @@ func TestIsFormulaInstalledPin(t *testing.T) {
 	// Create formula directory
 	formulaDir := filepath.Join(tempDir, "test-formula")
 	versionDir := filepath.Join(formulaDir, "1.0.0")
-	os.MkdirAll(versionDir, 0755)
+	_ = os.MkdirAll(versionDir, 0755)
 
 	installed = isFormulaInstalledPin(cfg, "test-formula")
 	if !installed {
@@ -269,7 +269,7 @@ func TestPinCommandExecution(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
-	defer os.RemoveAll(tempDir)
+	defer func() { _ = os.RemoveAll(tempDir) }()
 
 	cfg := &config.Config{
 		HomebrewCellar:  filepath.Join(tempDir, "Cellar"),
@@ -278,11 +278,11 @@ func TestPinCommandExecution(t *testing.T) {
 
 	// Create cellar with installed formula
 	cellarDir := cfg.HomebrewCellar
-	os.MkdirAll(cellarDir, 0755)
+	_ = os.MkdirAll(cellarDir, 0755)
 
 	formulaDir := filepath.Join(cellarDir, "test-formula")
 	versionDir := filepath.Join(formulaDir, "1.0.0")
-	os.MkdirAll(versionDir, 0755)
+	_ = os.MkdirAll(versionDir, 0755)
 
 	// Test pin command
 	pinCmd := NewPinCmd(cfg)
@@ -307,7 +307,7 @@ func TestPinMultipleFormulae(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
-	defer os.RemoveAll(tempDir)
+	defer func() { _ = os.RemoveAll(tempDir) }()
 
 	cfg := &config.Config{
 		HomebrewCellar:  filepath.Join(tempDir, "Cellar"),
@@ -316,17 +316,17 @@ func TestPinMultipleFormulae(t *testing.T) {
 
 	// Create cellar with multiple installed formulae
 	cellarDir := cfg.HomebrewCellar
-	os.MkdirAll(cellarDir, 0755)
+	_ = os.MkdirAll(cellarDir, 0755)
 
 	formulae := []string{"formula1", "formula2", "formula3"}
 	for _, formula := range formulae {
 		formulaDir := filepath.Join(cellarDir, formula)
 		versionDir := filepath.Join(formulaDir, "1.0.0")
-		os.MkdirAll(versionDir, 0755)
+		_ = os.MkdirAll(versionDir, 0755)
 	}
 
 	// Create library directory
-	os.MkdirAll(cfg.HomebrewLibrary, 0755)
+	_ = os.MkdirAll(cfg.HomebrewLibrary, 0755)
 
 	// Pin all formulae
 	err = runPin(cfg, formulae)

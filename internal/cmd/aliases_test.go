@@ -132,7 +132,7 @@ func TestOpenURL(t *testing.T) {
 	err := openURL("https://example.com")
 
 	// Restore stdout
-	w.Close()
+	_ = w.Close()
 	os.Stdout = oldStdout
 
 	if err != nil {
@@ -141,7 +141,7 @@ func TestOpenURL(t *testing.T) {
 
 	// Read captured output
 	var buf bytes.Buffer
-	buf.ReadFrom(r)
+	_, _ = buf.ReadFrom(r)
 	output := buf.String()
 
 	if !strings.Contains(output, "https://example.com") {
@@ -212,7 +212,7 @@ func TestRunDesc(t *testing.T) {
 	err := runDesc(cfg, []string{"test-formula"}, opts)
 
 	// Restore stdout
-	w.Close()
+	_ = w.Close()
 	os.Stdout = oldStdout
 
 	if err != nil {
@@ -221,7 +221,7 @@ func TestRunDesc(t *testing.T) {
 
 	// Read captured output
 	var buf bytes.Buffer
-	buf.ReadFrom(r)
+	_, _ = buf.ReadFrom(r)
 	output := buf.String()
 
 	if !strings.Contains(output, "test-formula") {
@@ -305,7 +305,7 @@ func TestRunOptionsWithFormulae(t *testing.T) {
 	err := runOptions(cfg, []string{"test-formula"}, opts)
 
 	// Restore stdout
-	w.Close()
+	_ = w.Close()
 	os.Stdout = oldStdout
 
 	if err != nil {
@@ -314,7 +314,7 @@ func TestRunOptionsWithFormulae(t *testing.T) {
 
 	// Read captured output
 	var buf bytes.Buffer
-	buf.ReadFrom(r)
+	_, _ = buf.ReadFrom(r)
 	output := buf.String()
 
 	if !strings.Contains(output, "no options available") {
@@ -358,14 +358,14 @@ func TestRunMissingNoArgs(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
-	defer os.RemoveAll(tempDir)
+	defer func() { _ = os.RemoveAll(tempDir) }()
 
 	cfg := &config.Config{
 		HomebrewCellar: filepath.Join(tempDir, "Cellar"),
 	}
 
 	// Create empty cellar
-	os.MkdirAll(cfg.HomebrewCellar, 0755)
+	_ = os.MkdirAll(cfg.HomebrewCellar, 0755)
 
 	err = runMissing(cfg, []string{}, []string{})
 	if err != nil {
@@ -513,13 +513,13 @@ func TestMissingCommandExecution(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
-	defer os.RemoveAll(tempDir)
+	defer func() { _ = os.RemoveAll(tempDir) }()
 
 	cfg := &config.Config{
 		HomebrewCellar: filepath.Join(tempDir, "Cellar"),
 	}
 
-	os.MkdirAll(cfg.HomebrewCellar, 0755)
+	_ = os.MkdirAll(cfg.HomebrewCellar, 0755)
 
 	cmd := NewMissingCmd(cfg)
 

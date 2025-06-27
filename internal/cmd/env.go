@@ -16,8 +16,8 @@ func NewPrefixCmd(cfg *config.Config) *cobra.Command {
 		Hidden: true,
 		Short:  "Display Homebrew's install path",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			fmt.Fprintln(cmd.OutOrStdout(), cfg.HomebrewPrefix)
-			return nil
+			_, err := fmt.Fprintln(cmd.OutOrStdout(), cfg.HomebrewPrefix)
+			return err
 		},
 	}
 
@@ -31,8 +31,8 @@ func NewCellarCmd(cfg *config.Config) *cobra.Command {
 		Hidden: true,
 		Short:  "Display Homebrew's Cellar path",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			fmt.Fprintln(cmd.OutOrStdout(), cfg.HomebrewCellar)
-			return nil
+			_, err := fmt.Fprintln(cmd.OutOrStdout(), cfg.HomebrewCellar)
+			return err
 		},
 	}
 
@@ -46,8 +46,8 @@ func NewCacheCmd(cfg *config.Config) *cobra.Command {
 		Hidden: true,
 		Short:  "Display Homebrew's download cache",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			fmt.Fprintln(cmd.OutOrStdout(), cfg.HomebrewCache)
-			return nil
+			_, err := fmt.Fprintln(cmd.OutOrStdout(), cfg.HomebrewCache)
+			return err
 		},
 	}
 

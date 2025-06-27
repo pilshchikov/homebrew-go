@@ -15,11 +15,11 @@ func TestVerifySHA256(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
-	defer os.RemoveAll(tempDir)
+	defer func() { _ = os.RemoveAll(tempDir) }()
 
 	testFile := filepath.Join(tempDir, "test.txt")
 	content := "Hello, World!"
-	
+
 	err = os.WriteFile(testFile, []byte(content), 0644)
 	if err != nil {
 		t.Fatalf("Failed to write test file: %v", err)
@@ -65,11 +65,11 @@ func TestComputeSHA256(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
-	defer os.RemoveAll(tempDir)
+	defer func() { _ = os.RemoveAll(tempDir) }()
 
 	testFile := filepath.Join(tempDir, "test.txt")
 	content := "Hello, World!"
-	
+
 	err = os.WriteFile(testFile, []byte(content), 0644)
 	if err != nil {
 		t.Fatalf("Failed to write test file: %v", err)
@@ -107,7 +107,7 @@ func TestVerifySHA256EdgeCases(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
-	defer os.RemoveAll(tempDir)
+	defer func() { _ = os.RemoveAll(tempDir) }()
 
 	// Test with empty file
 	emptyFile := filepath.Join(tempDir, "empty.txt")
@@ -162,12 +162,12 @@ func TestVerifySHA256WithSpecialCharacters(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
-	defer os.RemoveAll(tempDir)
+	defer func() { _ = os.RemoveAll(tempDir) }()
 
 	// Test with file containing special characters
 	specialFile := filepath.Join(tempDir, "special.txt")
 	specialContent := "Hello, 世界! 🌍 Special chars: \n\t\r"
-	
+
 	err = os.WriteFile(specialFile, []byte(specialContent), 0644)
 	if err != nil {
 		t.Fatalf("Failed to write special file: %v", err)
@@ -200,11 +200,11 @@ func TestSHA256CaseInsensitive(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
-	defer os.RemoveAll(tempDir)
+	defer func() { _ = os.RemoveAll(tempDir) }()
 
 	testFile := filepath.Join(tempDir, "test.txt")
 	content := "Case test"
-	
+
 	err = os.WriteFile(testFile, []byte(content), 0644)
 	if err != nil {
 		t.Fatalf("Failed to write test file: %v", err)
@@ -233,4 +233,3 @@ func TestSHA256CaseInsensitive(t *testing.T) {
 func contains(s, substr string) bool {
 	return len(s) >= len(substr) && (s == substr || len(substr) == 0 || strings.Contains(s, substr))
 }
-

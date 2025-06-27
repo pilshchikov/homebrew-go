@@ -26,35 +26,35 @@ import (
 
 // progressReader wraps an io.Reader to show download progress
 type progressReader struct {
-	reader   io.Reader
-	total    int64
-	current  int64
-	filename string
+	reader     io.Reader
+	total      int64
+	current    int64
+	filename   string
 	lastUpdate time.Time
 }
 
 func (pr *progressReader) Read(p []byte) (n int, err error) {
 	n, err = pr.reader.Read(p)
 	pr.current += int64(n)
-	
+
 	// Update progress every 100ms to avoid flooding the terminal
 	now := time.Now()
 	if now.Sub(pr.lastUpdate) > 100*time.Millisecond || err == io.EOF {
 		pr.lastUpdate = now
 		percent := float64(pr.current) / float64(pr.total) * 100
-		
+
 		// Format file size
 		currentMB := float64(pr.current) / 1024 / 1024
 		totalMB := float64(pr.total) / 1024 / 1024
-		
+
 		if err == io.EOF {
 			fmt.Printf("\r    Downloaded %s (%.1f MB) - 100%%\n", pr.filename, totalMB)
 		} else {
-			fmt.Printf("\r    Downloading %s (%.1f/%.1f MB) - %.1f%%", 
+			fmt.Printf("\r    Downloading %s (%.1f/%.1f MB) - %.1f%%",
 				pr.filename, currentMB, totalMB, percent)
 		}
 	}
-	
+
 	return n, err
 }
 
@@ -74,12 +74,12 @@ type Options struct {
 	OnlyDependencies   bool
 	IncludeTest        bool
 	HeadOnly           bool
-	KeepTmp           bool
-	DebugSymbols      bool
-	Force             bool
-	DryRun            bool
-	Verbose           bool
-	CC                string
+	KeepTmp            bool
+	DebugSymbols       bool
+	Force              bool
+	DryRun             bool
+	Verbose            bool
+	CC                 string
 	StrictVerification bool
 }
 
@@ -179,7 +179,7 @@ func (i *Installer) InstallFormula(name string) (*InstallResult, error) {
 		logger.Step("Installing from bottle")
 		result.Source = "bottle"
 		installErr = i.installFromBottle(f)
-		
+
 		// If bottle installation fails, fall back to source
 		if installErr != nil {
 			// Only show warning for unexpected errors, not missing bottles
@@ -260,7 +260,7 @@ func (i *Installer) InstallCask(name string) (*InstallResult, error) {
 
 	// Create cask installer
 	caskInstaller := cask.NewCaskInstaller(i.cfg)
-	
+
 	// Set up install options
 	opts := &cask.CaskInstallOptions{
 		Force:        i.opts.Force,
@@ -299,24 +299,24 @@ func (i *Installer) resolveFormula(name string) (*formula.Formula, error) {
 	} else {
 		logger.Debug("API resolution failed for %s: %v", name, err)
 	}
-	
+
 	// Fallback to tap resolution
 	tapManager := tap.NewManager(i.cfg)
-	
+
 	// Check if it's a tap-qualified name (e.g., user/repo/formula)
 	parts := strings.Split(name, "/")
 	if len(parts) == 3 {
 		tapName := parts[0] + "/" + parts[1]
 		formulaName := parts[2]
-		
+
 		t, err := tapManager.GetTap(tapName)
 		if err != nil {
 			return nil, fmt.Errorf("tap %s not found: %w", tapName, err)
 		}
-		
+
 		return t.GetFormula(formulaName)
 	}
-	
+
 	// Check core tap first
 	coreTap, err := tapManager.GetTap("homebrew/core")
 	if err == nil {
@@ -324,19 +324,19 @@ func (i *Installer) resolveFormula(name string) (*formula.Formula, error) {
 			return f, nil
 		}
 	}
-	
+
 	// Search all taps
 	taps, err := tapManager.ListTaps()
 	if err != nil {
 		return nil, fmt.Errorf("failed to list taps: %w", err)
 	}
-	
+
 	for _, t := range taps {
 		if f, err := t.GetFormula(name); err == nil {
 			return f, nil
 		}
 	}
-	
+
 	return nil, fmt.Errorf("formula %s not found", name)
 }
 
@@ -351,10 +351,10 @@ func (i *Installer) installDependencies(f *formula.Formula) error {
 
 	for idx, dep := range deps {
 		logger.Progress("Installing dependency %d/%d: %s", idx+1, len(deps), dep)
-		
+
 		// Check if already installed
 		if installed, err := i.isFormulaInstalled(dep); err != nil {
-			return errors.NewDependencyError(f.Name, dep, 
+			return errors.NewDependencyError(f.Name, dep,
 				fmt.Errorf("failed to check if %s is installed: %w", dep, err))
 		} else if installed {
 			logger.Step("Dependency %s already installed", dep)
@@ -369,7 +369,7 @@ func (i *Installer) installDependencies(f *formula.Formula) error {
 			}
 			return errors.NewDependencyError(f.Name, dep, err)
 		}
-		
+
 		logger.Success("Dependency %s installed successfully", dep)
 	}
 
@@ -393,26 +393,26 @@ func (i *Installer) shouldUseBottle(f *formula.Formula) bool {
 func (i *Installer) isBottleExpected(f *formula.Formula, err error) bool {
 	// Check if this looks like a formula that should have bottles
 	// vs one that's expected to be source-only
-	
+
 	// If the formula explicitly claims to have bottles, then failure is unexpected
 	platform := i.apiClient.GetPlatformTag()
 	if f.HasBottle(platform) && f.Bottle != nil && f.Bottle.Stable != nil {
 		// Check if it's just a 401/403 auth error (expected for missing bottles)
 		errStr := err.Error()
-		if strings.Contains(errStr, "401") || strings.Contains(errStr, "403") || 
-		   strings.Contains(errStr, "not found") || strings.Contains(errStr, "no bottle available") {
+		if strings.Contains(errStr, "401") || strings.Contains(errStr, "403") ||
+			strings.Contains(errStr, "not found") || strings.Contains(errStr, "no bottle available") {
 			return false // This is expected for formulae without actual bottles
 		}
 		return true // Other errors are unexpected
 	}
-	
+
 	// For formulae without bottle metadata, failure is expected
 	return false
 }
 
 func (i *Installer) installFromBottle(f *formula.Formula) error {
 	platform := i.apiClient.GetPlatformTag()
-	
+
 	// Try to download bottle using API client
 	bottlePath, err := i.apiClient.DownloadBottle(f, platform)
 	if err != nil {
@@ -449,7 +449,7 @@ func (i *Installer) installFromBottle(f *formula.Formula) error {
 
 	// Clean up bottle file unless keeping temp files
 	if !i.opts.KeepTmp {
-		os.Remove(bottlePath)
+		_ = os.Remove(bottlePath)
 	}
 
 	return nil
@@ -464,7 +464,7 @@ func (i *Installer) installFromSource(f *formula.Formula) error {
 
 	defer func() {
 		if !i.opts.KeepTmp {
-			os.RemoveAll(buildDir)
+			_ = os.RemoveAll(buildDir)
 		}
 	}()
 
@@ -496,7 +496,7 @@ func (i *Installer) installFromSource(f *formula.Formula) error {
 	if err := i.extractTarGz(sourcePath, sourceExtractDir); err != nil {
 		return fmt.Errorf("failed to extract source: %w", err)
 	}
-	
+
 	// Find the actual source directory (usually contains the project files)
 	sourceDir, err := i.findSourceDirectory(sourceExtractDir)
 	if err != nil {
@@ -535,7 +535,7 @@ func (i *Installer) downloadFile(url, path string) error {
 	if err != nil {
 		return errors.NewNetworkError("download", url, err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusOK {
 		err := fmt.Errorf("HTTP %d: %s", resp.StatusCode, resp.Status)
@@ -549,14 +549,14 @@ func (i *Installer) downloadFile(url, path string) error {
 	if err != nil {
 		return errors.NewPermissionError("create file", path, err)
 	}
-	defer file.Close()
+	defer func() { _ = file.Close() }()
 
 	// Show download progress if content length is available
 	var reader io.Reader = resp.Body
 	if resp.ContentLength > 0 && !logger.IsQuiet() {
 		reader = &progressReader{
-			reader: resp.Body,
-			total:  resp.ContentLength,
+			reader:   resp.Body,
+			total:    resp.ContentLength,
 			filename: filename,
 		}
 	}
@@ -586,13 +586,13 @@ func (i *Installer) extractTarGz(tarPath, destDir string) error {
 	if err != nil {
 		return err
 	}
-	defer file.Close()
+	defer func() { _ = file.Close() }()
 
 	gzr, err := gzip.NewReader(file)
 	if err != nil {
 		return err
 	}
-	defer gzr.Close()
+	defer func() { _ = gzr.Close() }()
 
 	tr := tar.NewReader(gzr)
 
@@ -616,17 +616,17 @@ func (i *Installer) extractTarGz(tarPath, destDir string) error {
 			if err := os.MkdirAll(filepath.Dir(target), 0755); err != nil {
 				return err
 			}
-			
+
 			f, err := os.OpenFile(target, os.O_CREATE|os.O_RDWR, os.FileMode(header.Mode))
 			if err != nil {
 				return err
 			}
-			
+
 			if _, err := io.Copy(f, tr); err != nil {
-				f.Close()
+				_ = f.Close()
 				return err
 			}
-			f.Close()
+			_ = f.Close()
 		}
 	}
 
@@ -639,12 +639,12 @@ func (i *Installer) findSourceDirectory(extractDir string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	
+
 	// If there's only one directory, use it as the source directory
 	if len(files) == 1 && files[0].IsDir() {
 		return filepath.Join(extractDir, files[0].Name()), nil
 	}
-	
+
 	// Look for a directory with configure script
 	for _, file := range files {
 		if file.IsDir() {
@@ -655,13 +655,13 @@ func (i *Installer) findSourceDirectory(extractDir string) (string, error) {
 			}
 		}
 	}
-	
+
 	// If no subdirectory with configure, check if configure is in extract dir
 	configurePath := filepath.Join(extractDir, "configure")
 	if _, err := os.Stat(configurePath); err == nil {
 		return extractDir, nil
 	}
-	
+
 	// If no configure script found, look for Makefile
 	for _, file := range files {
 		if file.IsDir() {
@@ -672,7 +672,7 @@ func (i *Installer) findSourceDirectory(extractDir string) (string, error) {
 			}
 		}
 	}
-	
+
 	// Fallback: use the extract directory itself
 	return extractDir, nil
 }
@@ -684,7 +684,7 @@ func (i *Installer) detectBuildSystem(sourceDir, cellarPath string) ([][]string,
 		logger.Debug("Found configure script, using autotools")
 		return i.buildAutotoolsCommands(sourceDir, cellarPath)
 	}
-	
+
 	// Check for configure.ac/configure.in without configure script (needs autoreconf)
 	configureAcPath := filepath.Join(sourceDir, "configure.ac")
 	configureInPath := filepath.Join(sourceDir, "configure.in")
@@ -696,20 +696,20 @@ func (i *Installer) detectBuildSystem(sourceDir, cellarPath string) ([][]string,
 		logger.Debug("Found configure.in, using autotools with autoreconf")
 		return i.buildAutotoolsWithAutoreconf(sourceDir, cellarPath)
 	}
-	
+
 	// Check for CMake
 	cmakeListsPath := filepath.Join(sourceDir, "CMakeLists.txt")
 	if _, err := os.Stat(cmakeListsPath); err == nil {
 		logger.Debug("Found CMakeLists.txt, using CMake")
 		buildDir := filepath.Join(sourceDir, "build")
-		os.MkdirAll(buildDir, 0755)
+		_ = os.MkdirAll(buildDir, 0755)
 		return [][]string{
 			{"cmake", "-S", ".", "-B", "build", "-DCMAKE_INSTALL_PREFIX=" + cellarPath, "-DCMAKE_BUILD_TYPE=Release"},
 			{"cmake", "--build", "build", "--parallel"},
 			{"cmake", "--install", "build"},
 		}, "cmake", nil
 	}
-	
+
 	// Check for Meson
 	mesonBuildPath := filepath.Join(sourceDir, "meson.build")
 	if _, err := os.Stat(mesonBuildPath); err == nil {
@@ -720,7 +720,7 @@ func (i *Installer) detectBuildSystem(sourceDir, cellarPath string) ([][]string,
 			{"meson", "install", "-C", "builddir"},
 		}, "meson", nil
 	}
-	
+
 	// Check for Python setup.py
 	setupPyPath := filepath.Join(sourceDir, "setup.py")
 	if _, err := os.Stat(setupPyPath); err == nil {
@@ -730,7 +730,7 @@ func (i *Installer) detectBuildSystem(sourceDir, cellarPath string) ([][]string,
 			{"python3", "setup.py", "install", "--prefix=" + cellarPath},
 		}, "python-setuptools", nil
 	}
-	
+
 	// Check for Python pyproject.toml (modern Python packaging)
 	pyprojectPath := filepath.Join(sourceDir, "pyproject.toml")
 	if _, err := os.Stat(pyprojectPath); err == nil {
@@ -739,7 +739,7 @@ func (i *Installer) detectBuildSystem(sourceDir, cellarPath string) ([][]string,
 			{"pip3", "install", ".", "--prefix=" + cellarPath, "--no-deps"},
 		}, "python-pip", nil
 	}
-	
+
 	// Check for Rust Cargo.toml
 	cargoTomlPath := filepath.Join(sourceDir, "Cargo.toml")
 	if _, err := os.Stat(cargoTomlPath); err == nil {
@@ -749,18 +749,18 @@ func (i *Installer) detectBuildSystem(sourceDir, cellarPath string) ([][]string,
 			{"cargo", "install", "--path", ".", "--root", cellarPath},
 		}, "rust-cargo", nil
 	}
-	
+
 	// Check for Go modules
 	goModPath := filepath.Join(sourceDir, "go.mod")
 	if _, err := os.Stat(goModPath); err == nil {
 		logger.Debug("Found go.mod, using Go modules")
 		binDir := filepath.Join(cellarPath, "bin")
-		os.MkdirAll(binDir, 0755)
+		_ = os.MkdirAll(binDir, 0755)
 		return [][]string{
 			{"go", "build", "-o", binDir + "/", "./..."},
 		}, "go-modules", nil
 	}
-	
+
 	// Check for Node.js package.json
 	packageJsonPath := filepath.Join(sourceDir, "package.json")
 	if _, err := os.Stat(packageJsonPath); err == nil {
@@ -771,7 +771,7 @@ func (i *Installer) detectBuildSystem(sourceDir, cellarPath string) ([][]string,
 			{"npm", "install", "--prefix", cellarPath, "--global"},
 		}, "npm", nil
 	}
-	
+
 	// Check for Ninja build files
 	buildNinjaPath := filepath.Join(sourceDir, "build.ninja")
 	if _, err := os.Stat(buildNinjaPath); err == nil {
@@ -781,7 +781,7 @@ func (i *Installer) detectBuildSystem(sourceDir, cellarPath string) ([][]string,
 			{"ninja", "install"},
 		}, "ninja", nil
 	}
-	
+
 	// Check for Bazel BUILD files
 	buildBazelPath := filepath.Join(sourceDir, "BUILD")
 	buildBazelBazelPath := filepath.Join(sourceDir, "BUILD.bazel")
@@ -796,7 +796,7 @@ func (i *Installer) detectBuildSystem(sourceDir, cellarPath string) ([][]string,
 			{"bazel", "run", "//install", "--", "--prefix=" + cellarPath},
 		}, "bazel", nil
 	}
-	
+
 	// Check for standard Makefile
 	makefilePath := filepath.Join(sourceDir, "Makefile")
 	if _, err := os.Stat(makefilePath); err == nil {
@@ -806,29 +806,28 @@ func (i *Installer) detectBuildSystem(sourceDir, cellarPath string) ([][]string,
 			{"make", "install", "PREFIX=" + cellarPath},
 		}, "makefile", nil
 	}
-	
-	
+
 	// No recognized build system found
 	buildFiles := []string{}
 	possibleFiles := []string{
-		"CMakeLists.txt", "meson.build", "setup.py", "pyproject.toml", 
-		"Cargo.toml", "go.mod", "package.json", "build.ninja", 
+		"CMakeLists.txt", "meson.build", "setup.py", "pyproject.toml",
+		"Cargo.toml", "go.mod", "package.json", "build.ninja",
 		"BUILD", "BUILD.bazel", "WORKSPACE", "Makefile", "makefile",
 		"configure.in", "configure.ac", "Makefile.am", "Makefile.in",
 	}
-	
+
 	for _, file := range possibleFiles {
 		if _, err := os.Stat(filepath.Join(sourceDir, file)); err == nil {
 			buildFiles = append(buildFiles, file)
 		}
 	}
-	
+
 	buildErr := errors.NewBuildError("", "", fmt.Errorf("no supported build system found"))
 	buildErr.Suggestions = []string{
 		"This formula uses an unsupported or unrecognized build system",
 		"Supported: autotools, CMake, Meson, Python (setuptools/pip), Rust (cargo), Go, Node.js (npm), Ninja, Bazel, Make",
 	}
-	
+
 	if len(buildFiles) > 0 {
 		buildErr.Suggestions = append(buildErr.Suggestions,
 			fmt.Sprintf("Found build files: %s", strings.Join(buildFiles, ", ")),
@@ -838,7 +837,7 @@ func (i *Installer) detectBuildSystem(sourceDir, cellarPath string) ([][]string,
 			"No recognized build files found in source directory",
 			"This may be a library or data-only package")
 	}
-	
+
 	return nil, "", buildErr
 }
 
@@ -856,7 +855,7 @@ func (i *Installer) buildAutotoolsWithAutoreconf(sourceDir, cellarPath string) (
 	if err := i.ensureAutotoolsAvailable(); err != nil {
 		return nil, "", fmt.Errorf("autotools not available: %w", err)
 	}
-	
+
 	return [][]string{
 		{"autoreconf", "-fiv"},
 		{"./configure", "--prefix=" + cellarPath, "--disable-dependency-tracking"},
@@ -868,11 +867,11 @@ func (i *Installer) buildAutotoolsWithAutoreconf(sourceDir, cellarPath string) (
 func (i *Installer) ensureAutotoolsAvailable() error {
 	// Check for required autotools commands
 	requiredTools := []string{"autoreconf", "autoconf", "automake", "aclocal"}
-	
+
 	for _, tool := range requiredTools {
 		if _, err := exec.LookPath(tool); err != nil {
 			logger.Warn("Required tool '%s' not found", tool)
-			
+
 			// Try to install autotools using the system's package manager
 			if err := i.installAutotools(); err != nil {
 				return fmt.Errorf("autotools installation failed: %w", err)
@@ -880,13 +879,13 @@ func (i *Installer) ensureAutotoolsAvailable() error {
 			break
 		}
 	}
-	
+
 	return nil
 }
 
 func (i *Installer) installAutotools() error {
 	logger.Step("Installing autotools dependencies")
-	
+
 	// Try different package managers based on the system
 	if runtime.GOOS == "darwin" {
 		// Try to use Homebrew to install autotools
@@ -895,7 +894,7 @@ func (i *Installer) installAutotools() error {
 			logger.Success("Installed autotools via Homebrew")
 			return nil
 		}
-		
+
 		// Try MacPorts as fallback
 		cmd = exec.Command("port", "install", "autoconf", "automake", "libtool")
 		if err := cmd.Run(); err == nil {
@@ -910,7 +909,7 @@ func (i *Installer) installAutotools() error {
 			{"dnf", "install", "-y", "autoconf", "automake", "libtool"},
 			{"pacman", "-S", "--noconfirm", "autoconf", "automake", "libtool"},
 		}
-		
+
 		for _, mgr := range managers {
 			cmd := exec.Command(mgr[0], mgr[1:]...)
 			if err := cmd.Run(); err == nil {
@@ -919,13 +918,13 @@ func (i *Installer) installAutotools() error {
 			}
 		}
 	}
-	
+
 	return fmt.Errorf("could not install autotools automatically - please install autoconf, automake, and libtool manually")
 }
 
 func (i *Installer) getBuildSystemSuggestions(buildSystem, command string) []string {
 	suggestions := []string{}
-	
+
 	switch buildSystem {
 	case "autotools", "autotools-generate":
 		if strings.Contains(command, "configure") {
@@ -944,7 +943,7 @@ func (i *Installer) getBuildSystemSuggestions(buildSystem, command string) []str
 				"Install autotools if missing: brew install autoconf automake libtool",
 				"Check if configure.ac or configure.in syntax is correct")
 		}
-		
+
 	case "cmake":
 		if strings.Contains(command, "cmake") && strings.Contains(command, "-S") {
 			suggestions = append(suggestions,
@@ -962,7 +961,7 @@ func (i *Installer) getBuildSystemSuggestions(buildSystem, command string) []str
 				"Check if the build completed successfully",
 				"Ensure you have write permissions to the install directory")
 		}
-		
+
 	case "meson":
 		if strings.Contains(command, "setup") {
 			suggestions = append(suggestions,
@@ -980,21 +979,21 @@ func (i *Installer) getBuildSystemSuggestions(buildSystem, command string) []str
 				"Check if the build completed successfully",
 				"Ensure you have write permissions to the install directory")
 		}
-		
+
 	case "python-setuptools":
 		suggestions = append(suggestions,
 			"Ensure Python 3 and setuptools are installed",
 			"Try: pip3 install setuptools wheel",
 			"Check if all Python dependencies are available",
 			"Review setup.py for missing required packages")
-			
+
 	case "python-pip":
 		suggestions = append(suggestions,
 			"Ensure Python 3 and pip are installed",
 			"Try: python3 -m pip install --upgrade pip",
 			"Check if all Python dependencies are available",
 			"Review pyproject.toml for build system requirements")
-			
+
 	case "rust-cargo":
 		if strings.Contains(command, "build") {
 			suggestions = append(suggestions,
@@ -1007,7 +1006,7 @@ func (i *Installer) getBuildSystemSuggestions(buildSystem, command string) []str
 				"Check if the build completed successfully",
 				"Ensure the binary was built correctly")
 		}
-		
+
 	case "go-modules":
 		suggestions = append(suggestions,
 			"Ensure Go is installed: brew install go",
@@ -1015,7 +1014,7 @@ func (i *Installer) getBuildSystemSuggestions(buildSystem, command string) []str
 			"Try: go build -v for verbose output",
 			"Ensure you have internet access for module downloads",
 			"Check if go.mod and go.sum are valid")
-			
+
 	case "npm":
 		if strings.Contains(command, "install") && !strings.Contains(command, "global") {
 			suggestions = append(suggestions,
@@ -1033,44 +1032,44 @@ func (i *Installer) getBuildSystemSuggestions(buildSystem, command string) []str
 				"Check if the package was built successfully",
 				"Ensure you have write permissions to the global directory")
 		}
-		
+
 	case "ninja":
 		suggestions = append(suggestions,
 			"Ensure Ninja is installed: brew install ninja",
 			"Check if build.ninja was generated correctly",
 			"Try: ninja -v for verbose output",
 			"Verify all dependencies for the build targets")
-			
+
 	case "bazel":
 		suggestions = append(suggestions,
 			"Ensure Bazel is installed: brew install bazel",
 			"Check if WORKSPACE and BUILD files are valid",
 			"Try: bazel build --verbose_failures //...",
 			"Ensure all external dependencies can be downloaded")
-			
+
 	case "makefile":
 		suggestions = append(suggestions,
 			"Check for compilation errors in the output above",
 			"Ensure you have the required development tools installed",
 			"Try: make -j1 for sequential build to isolate errors",
 			"Review the Makefile for proper PREFIX handling")
-			
+
 	default:
 		suggestions = append(suggestions,
 			"Check the build system documentation for troubleshooting",
 			"Ensure all required build tools are installed",
 			"Review the project's README for build instructions")
 	}
-	
+
 	return suggestions
 }
 
 func (i *Installer) applyPatch(sourceDir string, patch *formula.Patch) error {
 	logger.Step("Applying patch")
-	
+
 	var patchContent []byte
 	var err error
-	
+
 	// Get patch content either from URL or inline data
 	if patch.URL != "" {
 		// Download patch from URL
@@ -1079,38 +1078,38 @@ func (i *Installer) applyPatch(sourceDir string, patch *formula.Patch) error {
 		if err := i.downloadFile(patch.URL, patchPath); err != nil {
 			return fmt.Errorf("failed to download patch: %w", err)
 		}
-		
+
 		patchContent, err = os.ReadFile(patchPath)
 		if err != nil {
 			return fmt.Errorf("failed to read patch file: %w", err)
 		}
-		
+
 		// Cleanup patch file
-		defer os.Remove(patchPath)
+		defer func() { _ = os.Remove(patchPath) }()
 	} else if patch.Data != "" {
 		// Use inline patch data
 		patchContent = []byte(patch.Data)
 	} else {
 		return fmt.Errorf("patch has no URL or inline data")
 	}
-	
+
 	// Apply the patch using the patch command
 	cmd := exec.Command("patch", fmt.Sprintf("-p%d", patch.Strip))
 	cmd.Dir = sourceDir
 	cmd.Stdin = strings.NewReader(string(patchContent))
-	
+
 	// Capture output for debugging
 	var stdout, stderr strings.Builder
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
-	
+
 	if err := cmd.Run(); err != nil {
 		logger.Error("Patch application failed:")
 		logger.Error("stdout: %s", stdout.String())
 		logger.Error("stderr: %s", stderr.String())
 		return fmt.Errorf("failed to apply patch: %w", err)
 	}
-	
+
 	logger.Success("Patch applied successfully")
 	return nil
 }
@@ -1125,12 +1124,12 @@ func (i *Installer) buildAndInstall(f *formula.Formula, sourceDir, cellarPath st
 
 	// Simple build process - in practice, this would be much more complex
 	// and would need to handle different build systems (autotools, cmake, etc.)
-	
+
 	// Set environment variables
 	env := os.Environ()
 	env = append(env, "PREFIX="+cellarPath)
 	env = append(env, "HOMEBREW_PREFIX="+i.cfg.HomebrewPrefix)
-	
+
 	if i.opts.CC != "" {
 		env = append(env, "CC="+i.opts.CC)
 	}
@@ -1140,25 +1139,25 @@ func (i *Installer) buildAndInstall(f *formula.Formula, sourceDir, cellarPath st
 	if err != nil {
 		return err
 	}
-	
+
 	logger.Debug("Using build system: %s", buildSystem)
 
 	for _, cmdArgs := range commands {
 		cmdName := strings.Join(cmdArgs, " ")
 		logger.Step("Running: %s", cmdName)
-		
+
 		cmd := exec.Command(cmdArgs[0], cmdArgs[1:]...)
 		cmd.Dir = sourceDir
 		cmd.Env = env
-		
+
 		// Always show live output to match original Homebrew behavior
 		// Capture output for error reporting while streaming live
 		var stdout, stderr strings.Builder
-		
+
 		// Create multi-writers to both capture and display live output
 		cmd.Stdout = io.MultiWriter(&stdout, os.Stdout)
 		cmd.Stderr = io.MultiWriter(&stderr, os.Stderr)
-		
+
 		// In quiet mode, only capture without live display
 		if logger.IsQuiet() {
 			cmd.Stdout = &stdout
@@ -1168,19 +1167,19 @@ func (i *Installer) buildAndInstall(f *formula.Formula, sourceDir, cellarPath st
 		if err := cmd.Run(); err != nil {
 			// Create detailed build error
 			buildErr := errors.NewBuildError(f.Name, f.Version, err)
-			
+
 			// Add build system and command-specific suggestions
 			buildErr.Suggestions = append(buildErr.Suggestions, i.getBuildSystemSuggestions(buildSystem, cmdArgs[0])...)
-			
+
 			// In quiet mode, show the captured output since it wasn't displayed live
 			if logger.IsQuiet() && stderr.Len() > 0 {
 				logger.Error("Build stderr output:")
 				logger.Error(stderr.String())
 			}
-			
+
 			return buildErr
 		}
-		
+
 		// Show successful step completion
 		logger.Success("Completed: %s", cmdName)
 	}
@@ -1190,53 +1189,53 @@ func (i *Installer) buildAndInstall(f *formula.Formula, sourceDir, cellarPath st
 
 func (i *Installer) linkFormula(f *formula.Formula) error {
 	logger.Debug("Linking formula %s", f.Name)
-	
+
 	cellarPath := f.GetCellarPath(i.cfg.HomebrewCellar)
 	binDir := filepath.Join(cellarPath, "bin")
-	
+
 	// Link binaries
 	if _, err := os.Stat(binDir); err == nil {
 		files, err := os.ReadDir(binDir)
 		if err != nil {
 			return err
 		}
-		
+
 		linkDir := filepath.Join(i.cfg.HomebrewPrefix, "bin")
 		if err := os.MkdirAll(linkDir, 0755); err != nil {
 			return err
 		}
-		
+
 		for _, file := range files {
 			if file.IsDir() {
 				continue
 			}
-			
+
 			src := filepath.Join(binDir, file.Name())
 			dst := filepath.Join(linkDir, file.Name())
-			
+
 			// Remove existing link
-			os.Remove(dst)
-			
+			_ = os.Remove(dst)
+
 			// Create symlink
 			if err := os.Symlink(src, dst); err != nil {
 				return err
 			}
 		}
 	}
-	
+
 	return nil
 }
 
 func (i *Installer) writeInstallReceipt(f *formula.Formula, source string) error {
 	receipt := InstallReceipt{
-		Name:        f.Name,
-		Version:     f.Version,
-		InstalledOn: time.Now(),
-		InstalledBy: "brew-go",
-		Source:      source,
-		Dependencies: f.Dependencies,
+		Name:              f.Name,
+		Version:           f.Version,
+		InstalledOn:       time.Now(),
+		InstalledBy:       "brew-go",
+		Source:            source,
+		Dependencies:      f.Dependencies,
 		BuildDependencies: f.BuildDependencies,
-		Platform:    i.apiClient.GetPlatformTag(),
+		Platform:          i.apiClient.GetPlatformTag(),
 	}
 
 	if i.opts.CC != "" {

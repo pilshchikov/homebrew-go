@@ -20,7 +20,7 @@ func TestNew(t *testing.T) {
 	cfg := &config.Config{}
 	opts := &Options{
 		BuildFromSource: true,
-		Verbose:        true,
+		Verbose:         true,
 	}
 
 	installer := New(cfg, opts)
@@ -56,7 +56,7 @@ func TestGetPlatform(t *testing.T) {
 func TestShouldUseBottle(t *testing.T) {
 	cfg := &config.Config{}
 	installer := New(cfg, &Options{})
-	
+
 	// Get the actual platform tag that the API client would use
 	platformTag := installer.apiClient.GetPlatformTag()
 
@@ -139,7 +139,7 @@ func TestShouldUseBottle(t *testing.T) {
 func TestVerifyChecksum(t *testing.T) {
 	// Initialize logger for tests
 	logger.Init(false, false, true) // quiet mode
-	
+
 	cfg := &config.Config{}
 	installer := New(cfg, &Options{})
 
@@ -317,8 +317,8 @@ func TestOptionsValidation(t *testing.T) {
 			name: "build from source",
 			opts: &Options{
 				BuildFromSource: true,
-				KeepTmp:        true,
-				DebugSymbols:   true,
+				KeepTmp:         true,
+				DebugSymbols:    true,
 			},
 		},
 		{
@@ -394,40 +394,40 @@ func TestExtractTarGz(t *testing.T) {
 func TestProgressReader(t *testing.T) {
 	content := "Hello, World! This is test content for progress reader."
 	reader := strings.NewReader(content)
-	
+
 	progressReader := &progressReader{
 		reader:   reader,
 		total:    int64(len(content)),
 		filename: "test-file.txt",
 	}
-	
+
 	// Read in chunks to test progress updates
 	buffer := make([]byte, 10)
 	totalRead := 0
-	
+
 	for {
 		n, err := progressReader.Read(buffer)
 		totalRead += n
-		
+
 		if err == io.EOF {
 			break
 		}
-		
+
 		if err != nil {
 			t.Fatalf("progressReader.Read() failed: %v", err)
 		}
-		
+
 		// Verify progress tracking
 		if progressReader.current != int64(totalRead) {
 			t.Errorf("progressReader.current = %d, want %d", progressReader.current, totalRead)
 		}
 	}
-	
+
 	// Verify total was read correctly
 	if totalRead != len(content) {
 		t.Errorf("Total read = %d, want %d", totalRead, len(content))
 	}
-	
+
 	if progressReader.current != int64(len(content)) {
 		t.Errorf("Final progress = %d, want %d", progressReader.current, len(content))
 	}
@@ -436,22 +436,22 @@ func TestProgressReader(t *testing.T) {
 func TestDownloadFileWithProgress(t *testing.T) {
 	// Initialize logger for tests
 	logger.Init(false, false, true) // quiet mode for tests
-	
+
 	// This test requires a mock HTTP server for full testing
 	// For now, test the error cases
-	
+
 	cfg := &config.Config{}
 	installer := New(cfg, &Options{})
-	
+
 	tmpDir := t.TempDir()
 	destPath := filepath.Join(tmpDir, "downloaded-file")
-	
+
 	// Test with invalid URL
 	err := installer.downloadFile("invalid://url", destPath)
 	if err == nil {
 		t.Error("downloadFile() should fail with invalid URL")
 	}
-	
+
 	// Verify it returns the enhanced error type
 	if !strings.Contains(err.Error(), "download") {
 		t.Errorf("downloadFile() should return enhanced error, got: %v", err)
@@ -461,9 +461,9 @@ func TestDownloadFileWithProgress(t *testing.T) {
 func TestFindSourceDirectory(t *testing.T) {
 	cfg := &config.Config{}
 	installer := New(cfg, &Options{})
-	
+
 	tmpDir := t.TempDir()
-	
+
 	tests := []struct {
 		name        string
 		setupFunc   func() string
@@ -474,9 +474,9 @@ func TestFindSourceDirectory(t *testing.T) {
 			name: "single directory with configure",
 			setupFunc: func() string {
 				subDir := filepath.Join(tmpDir, "test-1.0.0")
-				os.MkdirAll(subDir, 0755)
+				_ = os.MkdirAll(subDir, 0755)
 				configFile := filepath.Join(subDir, "configure")
-				os.WriteFile(configFile, []byte("#!/bin/bash\n"), 0755)
+				_ = os.WriteFile(configFile, []byte("#!/bin/bash\n"), 0755)
 				return tmpDir
 			},
 			expectError: false,
@@ -486,9 +486,9 @@ func TestFindSourceDirectory(t *testing.T) {
 			name: "configure in root",
 			setupFunc: func() string {
 				extractDir := filepath.Join(tmpDir, "direct")
-				os.MkdirAll(extractDir, 0755)
+				_ = os.MkdirAll(extractDir, 0755)
 				configFile := filepath.Join(extractDir, "configure")
-				os.WriteFile(configFile, []byte("#!/bin/bash\n"), 0755)
+				_ = os.WriteFile(configFile, []byte("#!/bin/bash\n"), 0755)
 				return extractDir
 			},
 			expectError: false,
@@ -498,30 +498,30 @@ func TestFindSourceDirectory(t *testing.T) {
 			setupFunc: func() string {
 				extractDir := filepath.Join(tmpDir, "makefile-test")
 				subDir := filepath.Join(extractDir, "source")
-				os.MkdirAll(subDir, 0755)
+				_ = os.MkdirAll(subDir, 0755)
 				makeFile := filepath.Join(subDir, "Makefile")
-				os.WriteFile(makeFile, []byte("all:\n\techo 'building'\n"), 0644)
+				_ = os.WriteFile(makeFile, []byte("all:\n\techo 'building'\n"), 0644)
 				return extractDir
 			},
 			expectError: false,
 			expectPath:  "source",
 		},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			extractDir := tt.setupFunc()
-			
+
 			result, err := installer.findSourceDirectory(extractDir)
-			
+
 			if tt.expectError && err == nil {
 				t.Error("findSourceDirectory() should have failed")
 			}
-			
+
 			if !tt.expectError && err != nil {
 				t.Errorf("findSourceDirectory() failed: %v", err)
 			}
-			
+
 			if tt.expectPath != "" && !strings.HasSuffix(result, tt.expectPath) {
 				t.Errorf("findSourceDirectory() = %s, should end with %s", result, tt.expectPath)
 			}
@@ -532,20 +532,20 @@ func TestFindSourceDirectory(t *testing.T) {
 func TestEnhancedErrorHandling(t *testing.T) {
 	// Initialize logger for tests
 	logger.Init(false, false, true) // quiet mode
-	
+
 	cfg := &config.Config{}
 	installer := New(cfg, &Options{})
-	
+
 	// Test enhanced checksum verification
 	tmpDir := t.TempDir()
 	testFile := filepath.Join(tmpDir, "hello-1.0.0.tar.gz")
-	os.WriteFile(testFile, []byte("test content"), 0644)
-	
+	_ = os.WriteFile(testFile, []byte("test content"), 0644)
+
 	err := installer.verifier.VerifySource(testFile, "wrong_checksum", 0)
 	if err == nil {
 		t.Error("VerifySource() should fail with wrong checksum")
 	}
-	
+
 	// Verify it's enhanced error with context
 	errStr := err.Error()
 	if !strings.Contains(errStr, "checksum") {
@@ -558,32 +558,32 @@ func TestBuildAndInstallErrorHandling(t *testing.T) {
 		HomebrewCellar: t.TempDir(),
 	}
 	installer := New(cfg, &Options{})
-	
+
 	// Create a test formula
 	formula := &formula.Formula{
 		Name:    "test-formula",
 		Version: "1.0.0",
 	}
-	
+
 	// Test with non-existent source directory
 	nonExistentDir := "/non/existent/directory"
 	cellarPath := filepath.Join(cfg.HomebrewCellar, "test-formula", "1.0.0")
-	
+
 	err := installer.buildAndInstall(formula, nonExistentDir, cellarPath)
 	if err == nil {
 		t.Error("buildAndInstall() should fail with non-existent source directory")
 	}
-	
+
 	// Test with directory without build system
 	tmpDir := t.TempDir()
 	emptySourceDir := filepath.Join(tmpDir, "empty-source")
-	os.MkdirAll(emptySourceDir, 0755)
-	
+	_ = os.MkdirAll(emptySourceDir, 0755)
+
 	err = installer.buildAndInstall(formula, emptySourceDir, cellarPath)
 	if err == nil {
 		t.Error("buildAndInstall() should fail with no build system")
 	}
-	
+
 	// Should return enhanced error
 	if !strings.Contains(err.Error(), "build") {
 		t.Errorf("buildAndInstall() should return enhanced build error, got: %v", err)
@@ -595,23 +595,23 @@ func TestInstallDependenciesProgress(t *testing.T) {
 		HomebrewCellar: t.TempDir(),
 	}
 	installer := New(cfg, &Options{})
-	
+
 	// Create a formula with dependencies
 	formula := &formula.Formula{
 		Name:         "main-formula",
 		Version:      "1.0.0",
 		Dependencies: []string{"dep1", "dep2"},
 	}
-	
+
 	// This test would need more complex mocking to fully test
 	// For now, test the basic structure
 	err := installer.installDependencies(formula)
-	
+
 	// Should fail because dependencies don't exist, but should return enhanced error
 	if err == nil {
 		t.Error("installDependencies() should fail with non-existent dependencies")
 	}
-	
+
 	// Verify it returns structured error
 	if !strings.Contains(err.Error(), "dependency") {
 		t.Errorf("installDependencies() should return dependency error, got: %v", err)
@@ -623,149 +623,149 @@ func TestDetectBuildSystem(t *testing.T) {
 		HomebrewCellar: t.TempDir(),
 	}
 	installer := New(cfg, &Options{})
-	
+
 	tests := []struct {
-		name           string
-		setupFunc      func(dir string)
-		expectedSystem string
-		expectError    bool
+		name             string
+		setupFunc        func(dir string)
+		expectedSystem   string
+		expectError      bool
 		expectedCommands int
 	}{
 		{
 			name: "autotools with configure",
 			setupFunc: func(dir string) {
-				os.WriteFile(filepath.Join(dir, "configure"), []byte("#!/bin/bash\n"), 0755)
+				_ = os.WriteFile(filepath.Join(dir, "configure"), []byte("#!/bin/bash\n"), 0755)
 			},
-			expectedSystem: "autotools",
+			expectedSystem:   "autotools",
 			expectedCommands: 3,
 		},
 		{
 			name: "cmake",
 			setupFunc: func(dir string) {
-				os.WriteFile(filepath.Join(dir, "CMakeLists.txt"), []byte("cmake_minimum_required(VERSION 3.0)\n"), 0644)
+				_ = os.WriteFile(filepath.Join(dir, "CMakeLists.txt"), []byte("cmake_minimum_required(VERSION 3.0)\n"), 0644)
 			},
-			expectedSystem: "cmake",
+			expectedSystem:   "cmake",
 			expectedCommands: 3,
 		},
 		{
 			name: "meson",
 			setupFunc: func(dir string) {
-				os.WriteFile(filepath.Join(dir, "meson.build"), []byte("project('test')\n"), 0644)
+				_ = os.WriteFile(filepath.Join(dir, "meson.build"), []byte("project('test')\n"), 0644)
 			},
-			expectedSystem: "meson",
+			expectedSystem:   "meson",
 			expectedCommands: 3,
 		},
 		{
 			name: "python setuptools",
 			setupFunc: func(dir string) {
-				os.WriteFile(filepath.Join(dir, "setup.py"), []byte("from setuptools import setup\nsetup()\n"), 0644)
+				_ = os.WriteFile(filepath.Join(dir, "setup.py"), []byte("from setuptools import setup\nsetup()\n"), 0644)
 			},
-			expectedSystem: "python-setuptools",
+			expectedSystem:   "python-setuptools",
 			expectedCommands: 2,
 		},
 		{
 			name: "python pip",
 			setupFunc: func(dir string) {
-				os.WriteFile(filepath.Join(dir, "pyproject.toml"), []byte("[build-system]\nrequires = ['setuptools']\n"), 0644)
+				_ = os.WriteFile(filepath.Join(dir, "pyproject.toml"), []byte("[build-system]\nrequires = ['setuptools']\n"), 0644)
 			},
-			expectedSystem: "python-pip",
+			expectedSystem:   "python-pip",
 			expectedCommands: 1,
 		},
 		{
 			name: "rust cargo",
 			setupFunc: func(dir string) {
-				os.WriteFile(filepath.Join(dir, "Cargo.toml"), []byte("[package]\nname = 'test'\nversion = '0.1.0'\n"), 0644)
+				_ = os.WriteFile(filepath.Join(dir, "Cargo.toml"), []byte("[package]\nname = 'test'\nversion = '0.1.0'\n"), 0644)
 			},
-			expectedSystem: "rust-cargo",
+			expectedSystem:   "rust-cargo",
 			expectedCommands: 2,
 		},
 		{
 			name: "go modules",
 			setupFunc: func(dir string) {
-				os.WriteFile(filepath.Join(dir, "go.mod"), []byte("module test\ngo 1.21\n"), 0644)
+				_ = os.WriteFile(filepath.Join(dir, "go.mod"), []byte("module test\ngo 1.21\n"), 0644)
 			},
-			expectedSystem: "go-modules",
+			expectedSystem:   "go-modules",
 			expectedCommands: 1,
 		},
 		{
 			name: "node.js npm",
 			setupFunc: func(dir string) {
-				os.WriteFile(filepath.Join(dir, "package.json"), []byte("{\"name\": \"test\", \"version\": \"1.0.0\"}\n"), 0644)
+				_ = os.WriteFile(filepath.Join(dir, "package.json"), []byte("{\"name\": \"test\", \"version\": \"1.0.0\"}\n"), 0644)
 			},
-			expectedSystem: "npm",
+			expectedSystem:   "npm",
 			expectedCommands: 3,
 		},
 		{
 			name: "ninja",
 			setupFunc: func(dir string) {
-				os.WriteFile(filepath.Join(dir, "build.ninja"), []byte("rule compile\n  command = gcc $in -o $out\n"), 0644)
+				_ = os.WriteFile(filepath.Join(dir, "build.ninja"), []byte("rule compile\n  command = gcc $in -o $out\n"), 0644)
 			},
-			expectedSystem: "ninja",
+			expectedSystem:   "ninja",
 			expectedCommands: 2,
 		},
 		{
 			name: "bazel",
 			setupFunc: func(dir string) {
-				os.WriteFile(filepath.Join(dir, "WORKSPACE"), []byte("workspace(name = 'test')\n"), 0644)
-				os.WriteFile(filepath.Join(dir, "BUILD"), []byte("cc_binary(name = 'test', srcs = ['main.c'])\n"), 0644)
+				_ = os.WriteFile(filepath.Join(dir, "WORKSPACE"), []byte("workspace(name = 'test')\n"), 0644)
+				_ = os.WriteFile(filepath.Join(dir, "BUILD"), []byte("cc_binary(name = 'test', srcs = ['main.c'])\n"), 0644)
 			},
-			expectedSystem: "bazel",
+			expectedSystem:   "bazel",
 			expectedCommands: 2,
 		},
 		{
 			name: "makefile",
 			setupFunc: func(dir string) {
-				os.WriteFile(filepath.Join(dir, "Makefile"), []byte("all:\n\techo 'building'\n"), 0644)
+				_ = os.WriteFile(filepath.Join(dir, "Makefile"), []byte("all:\n\techo 'building'\n"), 0644)
 			},
-			expectedSystem: "makefile",
+			expectedSystem:   "makefile",
 			expectedCommands: 2,
 		},
 		{
 			name: "autotools generate",
 			setupFunc: func(dir string) {
-				os.WriteFile(filepath.Join(dir, "configure.ac"), []byte("AC_INIT([test], [1.0])\n"), 0644)
-				os.WriteFile(filepath.Join(dir, "Makefile.am"), []byte("SUBDIRS = src\n"), 0644)
+				_ = os.WriteFile(filepath.Join(dir, "configure.ac"), []byte("AC_INIT([test], [1.0])\n"), 0644)
+				_ = os.WriteFile(filepath.Join(dir, "Makefile.am"), []byte("SUBDIRS = src\n"), 0644)
 			},
-			expectedSystem: "autotools-generate",
+			expectedSystem:   "autotools-generate",
 			expectedCommands: 4,
 		},
 		{
 			name: "no build system",
 			setupFunc: func(dir string) {
-				os.WriteFile(filepath.Join(dir, "README.txt"), []byte("This is a readme\n"), 0644)
+				_ = os.WriteFile(filepath.Join(dir, "README.txt"), []byte("This is a readme\n"), 0644)
 			},
 			expectError: true,
 		},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tmpDir := t.TempDir()
 			cellarPath := filepath.Join(tmpDir, "cellar")
-			
+
 			tt.setupFunc(tmpDir)
-			
+
 			commands, buildSystem, err := installer.detectBuildSystem(tmpDir, cellarPath)
-			
+
 			if tt.expectError {
 				if err == nil {
 					t.Error("detectBuildSystem() should have failed for no build system")
 				}
 				return
 			}
-			
+
 			if err != nil {
 				t.Fatalf("detectBuildSystem() failed: %v", err)
 			}
-			
+
 			if buildSystem != tt.expectedSystem {
 				t.Errorf("detectBuildSystem() buildSystem = %s, want %s", buildSystem, tt.expectedSystem)
 			}
-			
+
 			if len(commands) != tt.expectedCommands {
 				t.Errorf("detectBuildSystem() commands count = %d, want %d", len(commands), tt.expectedCommands)
 			}
-			
+
 			// Verify commands are properly structured
 			for i, cmd := range commands {
 				if len(cmd) == 0 {
@@ -779,7 +779,7 @@ func TestDetectBuildSystem(t *testing.T) {
 func TestGetBuildSystemSuggestions(t *testing.T) {
 	cfg := &config.Config{}
 	installer := New(cfg, &Options{})
-	
+
 	tests := []struct {
 		name        string
 		buildSystem string
@@ -794,7 +794,7 @@ func TestGetBuildSystemSuggestions(t *testing.T) {
 		},
 		{
 			name:        "cmake setup",
-			buildSystem: "cmake", 
+			buildSystem: "cmake",
 			command:     "cmake -S",
 			expectCount: 3,
 		},
@@ -829,15 +829,15 @@ func TestGetBuildSystemSuggestions(t *testing.T) {
 			expectCount: 2,
 		},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			suggestions := installer.getBuildSystemSuggestions(tt.buildSystem, tt.command)
-			
+
 			if len(suggestions) < tt.expectCount {
 				t.Errorf("getBuildSystemSuggestions() suggestions count = %d, want at least %d", len(suggestions), tt.expectCount)
 			}
-			
+
 			// Verify suggestions are not empty
 			for i, suggestion := range suggestions {
 				if strings.TrimSpace(suggestion) == "" {
@@ -853,24 +853,24 @@ func TestAdvancedBuildSystemIntegration(t *testing.T) {
 		HomebrewCellar: t.TempDir(),
 	}
 	installer := New(cfg, &Options{})
-	
+
 	// Test that build system detection integrates properly with error suggestions
 	tmpDir := t.TempDir()
 	cellarPath := filepath.Join(tmpDir, "cellar")
-	
+
 	// Create a CMake project
-	os.WriteFile(filepath.Join(tmpDir, "CMakeLists.txt"), 
+	_ = os.WriteFile(filepath.Join(tmpDir, "CMakeLists.txt"),
 		[]byte("cmake_minimum_required(VERSION 3.0)\nproject(test)\n"), 0644)
-	
+
 	commands, buildSystem, err := installer.detectBuildSystem(tmpDir, cellarPath)
 	if err != nil {
 		t.Fatalf("detectBuildSystem() failed: %v", err)
 	}
-	
+
 	if buildSystem != "cmake" {
 		t.Errorf("detectBuildSystem() buildSystem = %s, want cmake", buildSystem)
 	}
-	
+
 	// Test that we get appropriate suggestions for cmake commands
 	for _, cmd := range commands {
 		if len(cmd) > 0 {
@@ -887,80 +887,80 @@ func TestAdvancedBuildSystemIntegration(t *testing.T) {
 func TestVerificationIntegration(t *testing.T) {
 	// Initialize logger for tests
 	logger.Init(false, false, true) // quiet mode
-	
+
 	cfg := &config.Config{
 		HomebrewCellar: t.TempDir(),
 	}
 	installer := New(cfg, &Options{StrictVerification: true})
-	
+
 	// Test that installer has verifier
 	if installer.verifier == nil {
 		t.Error("Installer should have verifier initialized")
 	}
-	
+
 	// Test bottle verification
 	tmpDir := t.TempDir()
 	bottleFile := filepath.Join(tmpDir, "test-1.0.0.arm64_sequoia.bottle.tar.gz")
 	bottleContent := "fake bottle content"
-	
+
 	err := os.WriteFile(bottleFile, []byte(bottleContent), 0644)
 	if err != nil {
 		t.Fatalf("Failed to create test bottle file: %v", err)
 	}
-	
+
 	// Calculate expected checksum
 	hasher := sha256.New()
 	hasher.Write([]byte(bottleContent))
 	expectedSHA := hex.EncodeToString(hasher.Sum(nil))
-	
+
 	// Test bottle verification
 	err = installer.verifier.VerifyBottle(bottleFile, expectedSHA, int64(len(bottleContent)))
 	if err != nil {
 		t.Errorf("VerifyBottle() failed: %v", err)
 	}
-	
+
 	// Test source verification
 	sourceFile := filepath.Join(tmpDir, "test-1.0.0.tar.gz")
 	sourceContent := "fake source content"
-	
+
 	err = os.WriteFile(sourceFile, []byte(sourceContent), 0644)
 	if err != nil {
 		t.Fatalf("Failed to create test source file: %v", err)
 	}
-	
+
 	// Calculate expected checksum
 	hasher = sha256.New()
 	hasher.Write([]byte(sourceContent))
 	expectedSourceSHA := hex.EncodeToString(hasher.Sum(nil))
-	
+
 	err = installer.verifier.VerifySource(sourceFile, expectedSourceSHA, int64(len(sourceContent)))
 	if err != nil {
 		t.Errorf("VerifySource() failed: %v", err)
 	}
-	
+
 	// Test installation verification
 	installDir := filepath.Join(cfg.HomebrewCellar, "test-formula")
 	err = os.MkdirAll(installDir, 0755)
 	if err != nil {
 		t.Fatalf("Failed to create installation directory: %v", err)
 	}
-	
+
 	binDir := filepath.Join(installDir, "bin")
 	err = os.MkdirAll(binDir, 0755)
 	if err != nil {
 		t.Fatalf("Failed to create bin directory: %v", err)
 	}
-	
+
 	err = os.WriteFile(filepath.Join(binDir, "test-binary"), []byte("fake binary"), 0755)
 	if err != nil {
 		t.Fatalf("Failed to create test binary: %v", err)
 	}
-	
+
 	result, err := installer.VerifyInstallation("test-formula")
 	if err != nil {
 		t.Errorf("VerifyInstallation() failed: %v", err)
 	}
-	
+
 	if !result.IsVerificationSuccessful() {
 		t.Errorf("Installation verification should succeed: %s", result.GetSummary())
 	}
@@ -968,13 +968,13 @@ func TestVerificationIntegration(t *testing.T) {
 
 func TestVerificationOptions(t *testing.T) {
 	cfg := &config.Config{}
-	
+
 	// Test strict verification option
 	strictInstaller := New(cfg, &Options{StrictVerification: true})
 	if strictInstaller.verifier == nil {
 		t.Error("Strict installer should have verifier")
 	}
-	
+
 	// Test non-strict verification option
 	nonStrictInstaller := New(cfg, &Options{StrictVerification: false})
 	if nonStrictInstaller.verifier == nil {

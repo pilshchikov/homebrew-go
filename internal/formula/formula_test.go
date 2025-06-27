@@ -502,12 +502,12 @@ func TestIsOlder(t *testing.T) {
 
 func TestToYAML(t *testing.T) {
 	formula := Formula{
-		Name:        "test-formula",
-		Version:     "1.0.0",
-		Homepage:    "https://example.com",
-		Description: "A test formula",
-		URL:         "https://example.com/test-1.0.0.tar.gz",
-		SHA256:      "abcd1234",
+		Name:         "test-formula",
+		Version:      "1.0.0",
+		Homepage:     "https://example.com",
+		Description:  "A test formula",
+		URL:          "https://example.com/test-1.0.0.tar.gz",
+		SHA256:       "abcd1234",
 		Dependencies: []string{"dep1", "dep2"},
 	}
 

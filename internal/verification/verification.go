@@ -45,12 +45,12 @@ type FileInfo struct {
 
 // VerificationResult contains the results of verification checks
 type VerificationResult struct {
-	FilePath       string
+	FilePath        string
 	ChecksumsPassed map[ChecksumType]bool
-	SizeMatches    bool
-	FileExists     bool
-	Errors         []error
-	Warnings       []string
+	SizeMatches     bool
+	FileExists      bool
+	Errors          []error
+	Warnings        []string
 }
 
 // Verifier handles package verification and integrity checks
@@ -82,7 +82,7 @@ func (v *Verifier) VerifyFile(fileInfo *FileInfo) *VerificationResult {
 	stat, err := os.Stat(fileInfo.Path)
 	if err != nil {
 		result.FileExists = false
-		result.Errors = append(result.Errors, 
+		result.Errors = append(result.Errors,
 			errors.NewPermissionError("file access", fileInfo.Path, err))
 		return result
 	}
@@ -94,11 +94,11 @@ func (v *Verifier) VerifyFile(fileInfo *FileInfo) *VerificationResult {
 		if !result.SizeMatches {
 			if v.strictMode {
 				result.Errors = append(result.Errors, fmt.Errorf(
-					"file size mismatch: expected %d bytes, got %d bytes", 
+					"file size mismatch: expected %d bytes, got %d bytes",
 					fileInfo.ExpectedSize, stat.Size()))
 			} else {
 				result.Warnings = append(result.Warnings, fmt.Sprintf(
-					"File size mismatch: expected %d bytes, got %d bytes", 
+					"File size mismatch: expected %d bytes, got %d bytes",
 					fileInfo.ExpectedSize, stat.Size()))
 			}
 		}
@@ -131,7 +131,7 @@ func (v *Verifier) verifyChecksum(filePath string, checksum Checksum) (bool, err
 	if err != nil {
 		return false, errors.NewPermissionError("read file for checksum", filePath, err)
 	}
-	defer file.Close()
+	defer func() { _ = file.Close() }()
 
 	if _, err := io.Copy(hasher, file); err != nil {
 		return false, fmt.Errorf("failed to compute %s checksum: %w", checksum.Type, err)
@@ -185,7 +185,7 @@ func (v *Verifier) ComputeChecksum(filePath string, checksumType ChecksumType) (
 	if err != nil {
 		return "", err
 	}
-	defer file.Close()
+	defer func() { _ = file.Close() }()
 
 	if _, err := io.Copy(hasher, file); err != nil {
 		return "", err
@@ -197,13 +197,13 @@ func (v *Verifier) ComputeChecksum(filePath string, checksumType ChecksumType) (
 // VerifyMultipleFiles verifies multiple files concurrently
 func (v *Verifier) VerifyMultipleFiles(files []*FileInfo) []*VerificationResult {
 	results := make([]*VerificationResult, len(files))
-	
+
 	// For small numbers of files, verify sequentially
 	// For larger numbers, we could implement concurrent verification
 	for i, fileInfo := range files {
 		results[i] = v.VerifyFile(fileInfo)
 	}
-	
+
 	return results
 }
 
@@ -212,17 +212,17 @@ func (result *VerificationResult) IsVerificationSuccessful() bool {
 	if !result.FileExists {
 		return false
 	}
-	
+
 	// Check if any checksums failed
 	for _, passed := range result.ChecksumsPassed {
 		if !passed {
 			return false
 		}
 	}
-	
+
 	// In strict mode, size must also match
 	// (We don't check this in non-strict mode since download sizes can vary)
-	
+
 	return len(result.Errors) == 0
 }
 
@@ -232,26 +232,26 @@ func (result *VerificationResult) GetSummary() string {
 		checksumCount := len(result.ChecksumsPassed)
 		return fmt.Sprintf("✓ Verification passed (%d checksums verified)", checksumCount)
 	}
-	
+
 	var issues []string
 	if !result.FileExists {
 		issues = append(issues, "file does not exist")
 	}
-	
+
 	for checksumType, passed := range result.ChecksumsPassed {
 		if !passed {
 			issues = append(issues, fmt.Sprintf("%s checksum failed", checksumType))
 		}
 	}
-	
+
 	if !result.SizeMatches {
 		issues = append(issues, "size mismatch")
 	}
-	
+
 	if len(result.Errors) > 0 {
 		issues = append(issues, fmt.Sprintf("%d errors", len(result.Errors)))
 	}
-	
+
 	return fmt.Sprintf("✗ Verification failed: %s", strings.Join(issues, ", "))
 }
 
@@ -291,14 +291,14 @@ func (pv *PackageVerifier) VerifyBottle(bottlePath, expectedSHA256 string, expec
 			{Type: SHA256, Value: expectedSHA256},
 		},
 	}
-	
+
 	result := pv.verifier.VerifyFile(fileInfo)
 	result.LogResults()
-	
+
 	if !result.IsVerificationSuccessful() {
 		return fmt.Errorf("bottle verification failed: %s", result.GetSummary())
 	}
-	
+
 	return nil
 }
 
@@ -311,14 +311,14 @@ func (pv *PackageVerifier) VerifySource(sourcePath, expectedSHA256 string, expec
 			{Type: SHA256, Value: expectedSHA256},
 		},
 	}
-	
+
 	result := pv.verifier.VerifyFile(fileInfo)
 	result.LogResults()
-	
+
 	if !result.IsVerificationSuccessful() {
 		return fmt.Errorf("source verification failed: %s", result.GetSummary())
 	}
-	
+
 	return nil
 }
 
@@ -326,7 +326,7 @@ func (pv *PackageVerifier) VerifySource(sourcePath, expectedSHA256 string, expec
 func (pv *PackageVerifier) VerifyInstallation(installPath string) *VerificationResult {
 	// For installed packages, we primarily check if files exist and have reasonable sizes
 	// We can't verify checksums since files may have been modified during installation
-	
+
 	stat, err := os.Stat(installPath)
 	if err != nil {
 		return &VerificationResult{
@@ -335,14 +335,14 @@ func (pv *PackageVerifier) VerifyInstallation(installPath string) *VerificationR
 			Errors:     []error{err},
 		}
 	}
-	
+
 	result := &VerificationResult{
 		FilePath:        installPath,
 		FileExists:      true,
 		SizeMatches:     true, // We don't have expected size for installations
 		ChecksumsPassed: make(map[ChecksumType]bool),
 	}
-	
+
 	// Check if it's a directory (typical for installations)
 	if stat.IsDir() {
 		// Count files in installation
@@ -356,7 +356,7 @@ func (pv *PackageVerifier) VerifyInstallation(installPath string) *VerificationR
 			}
 			return nil
 		})
-		
+
 		if err != nil {
 			result.Warnings = append(result.Warnings, fmt.Sprintf("Could not walk installation directory: %v", err))
 		} else if fileCount == 0 {
@@ -365,6 +365,6 @@ func (pv *PackageVerifier) VerifyInstallation(installPath string) *VerificationR
 			logger.Debug("Installation contains %d files", fileCount)
 		}
 	}
-	
+
 	return result
 }

@@ -21,7 +21,7 @@ func TestRunCleanup(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
-	defer os.RemoveAll(tempDir)
+	defer func() { _ = os.RemoveAll(tempDir) }()
 
 	cfg := &config.Config{
 		HomebrewCache:  filepath.Join(tempDir, "cache"),
@@ -30,8 +30,8 @@ func TestRunCleanup(t *testing.T) {
 	}
 
 	// Create test directories
-	os.MkdirAll(cfg.HomebrewCache, 0755)
-	os.MkdirAll(cfg.HomebrewCellar, 0755)
+	_ = os.MkdirAll(cfg.HomebrewCache, 0755)
+	_ = os.MkdirAll(cfg.HomebrewCellar, 0755)
 
 	// Test dry run
 	err = runCleanup(cfg, true)
@@ -83,10 +83,10 @@ func TestPrintColumns(t *testing.T) {
 
 			printColumns(tt.items, tt.columns)
 
-			w.Close()
+			_ = w.Close()
 			os.Stdout = oldStdout
 
-			buf.ReadFrom(r)
+			_, _ = buf.ReadFrom(r)
 			output := strings.TrimSpace(buf.String())
 
 			if tt.expected == "" && output != "" {
@@ -126,7 +126,7 @@ func TestCountDirItems(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
-	defer os.RemoveAll(tempDir)
+	defer func() { _ = os.RemoveAll(tempDir) }()
 
 	// Test empty directory
 	count := countDirItems(tempDir)
@@ -209,7 +209,7 @@ func TestListInstalled(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
-	defer os.RemoveAll(tempDir)
+	defer func() { _ = os.RemoveAll(tempDir) }()
 
 	cfg := &config.Config{
 		HomebrewCellar:   filepath.Join(tempDir, "cellar"),
@@ -217,16 +217,16 @@ func TestListInstalled(t *testing.T) {
 	}
 
 	// Create test directories
-	os.MkdirAll(cfg.HomebrewCellar, 0755)
-	os.MkdirAll(cfg.HomebrewCaskroom, 0755)
+	_ = os.MkdirAll(cfg.HomebrewCellar, 0755)
+	_ = os.MkdirAll(cfg.HomebrewCaskroom, 0755)
 
 	// Create some test formulae
 	formulaDir := filepath.Join(cfg.HomebrewCellar, "test-formula")
-	os.MkdirAll(filepath.Join(formulaDir, "1.0.0"), 0755)
+	_ = os.MkdirAll(filepath.Join(formulaDir, "1.0.0"), 0755)
 
 	// Create some test casks
 	caskDir := filepath.Join(cfg.HomebrewCaskroom, "test-cask")
-	os.MkdirAll(caskDir, 0755)
+	_ = os.MkdirAll(caskDir, 0755)
 
 	// Test listing all
 	err = listInstalled(cfg, false, false, false, false)
@@ -267,7 +267,7 @@ func TestListFormulaFiles(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
-	defer os.RemoveAll(tempDir)
+	defer func() { _ = os.RemoveAll(tempDir) }()
 
 	cfg := &config.Config{
 		HomebrewCellar: tempDir,
@@ -281,9 +281,9 @@ func TestListFormulaFiles(t *testing.T) {
 
 	// Create test formula structure
 	formulaDir := filepath.Join(tempDir, "test-formula", "1.0.0")
-	os.MkdirAll(filepath.Join(formulaDir, "bin"), 0755)
-	os.WriteFile(filepath.Join(formulaDir, "bin", "test-binary"), []byte("test"), 0755)
-	os.WriteFile(filepath.Join(formulaDir, "README.txt"), []byte("readme"), 0644)
+	_ = os.MkdirAll(filepath.Join(formulaDir, "bin"), 0755)
+	_ = os.WriteFile(filepath.Join(formulaDir, "bin", "test-binary"), []byte("test"), 0755)
+	_ = os.WriteFile(filepath.Join(formulaDir, "README.txt"), []byte("readme"), 0644)
 
 	// Test listing files
 	err = listFormulaFiles(cfg, "test-formula")
@@ -293,7 +293,7 @@ func TestListFormulaFiles(t *testing.T) {
 
 	// Test formula with no versions
 	emptyFormulaDir := filepath.Join(tempDir, "empty-formula")
-	os.MkdirAll(emptyFormulaDir, 0755)
+	_ = os.MkdirAll(emptyFormulaDir, 0755)
 
 	err = listFormulaFiles(cfg, "empty-formula")
 	if err == nil {
@@ -306,7 +306,7 @@ func TestDirSize(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
-	defer os.RemoveAll(tempDir)
+	defer func() { _ = os.RemoveAll(tempDir) }()
 
 	// Test empty directory
 	size, err := dirSize(tempDir)
@@ -347,7 +347,7 @@ func TestCleanupCache(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
-	defer os.RemoveAll(tempDir)
+	defer func() { _ = os.RemoveAll(tempDir) }()
 
 	// Test non-existent cache directory
 	size, count, err := cleanupCache("/nonexistent", false)
@@ -359,11 +359,11 @@ func TestCleanupCache(t *testing.T) {
 	}
 
 	// Create cache directory with some files
-	os.MkdirAll(tempDir, 0755)
+	_ = os.MkdirAll(tempDir, 0755)
 
 	// Create a recent file (should not be cleaned)
 	recentFile := filepath.Join(tempDir, "recent.txt")
-	os.WriteFile(recentFile, []byte("recent"), 0644)
+	_ = os.WriteFile(recentFile, []byte("recent"), 0644)
 
 	// Test cleanup (should not remove recent files)
 	size, count, err = cleanupCache(tempDir, false)
@@ -382,7 +382,7 @@ func TestCleanupCellar(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
-	defer os.RemoveAll(tempDir)
+	defer func() { _ = os.RemoveAll(tempDir) }()
 
 	// Test non-existent cellar directory
 	size, count, err := cleanupCellar("/nonexistent", false)
@@ -394,20 +394,20 @@ func TestCleanupCellar(t *testing.T) {
 	}
 
 	// Create cellar directory structure
-	os.MkdirAll(tempDir, 0755)
+	_ = os.MkdirAll(tempDir, 0755)
 
 	formulaDir := filepath.Join(tempDir, "test-formula")
-	os.MkdirAll(formulaDir, 0755)
+	_ = os.MkdirAll(formulaDir, 0755)
 
 	// Create multiple versions (only 2 should be kept)
 	for i := 1; i <= 4; i++ {
 		versionDir := filepath.Join(formulaDir, fmt.Sprintf("1.%d.0", i))
-		os.MkdirAll(versionDir, 0755)
-		os.WriteFile(filepath.Join(versionDir, "test.txt"), []byte("test"), 0644)
+		_ = os.MkdirAll(versionDir, 0755)
+		_ = os.WriteFile(filepath.Join(versionDir, "test.txt"), []byte("test"), 0644)
 	}
 
 	// Test cleanup (should remove old versions)
-	size, count, err = cleanupCellar(tempDir, false)
+	_, count, err = cleanupCellar(tempDir, false)
 	if err != nil {
 		t.Errorf("cleanupCellar failed: %v", err)
 	}
@@ -423,7 +423,7 @@ func TestCleanupLockFiles(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
-	defer os.RemoveAll(tempDir)
+	defer func() { _ = os.RemoveAll(tempDir) }()
 
 	cfg := &config.Config{
 		HomebrewPrefix: tempDir,
@@ -432,10 +432,10 @@ func TestCleanupLockFiles(t *testing.T) {
 
 	// Create some lock files
 	lockFile := filepath.Join(tempDir, "test.lock")
-	os.WriteFile(lockFile, []byte("lock"), 0644)
+	_ = os.WriteFile(lockFile, []byte("lock"), 0644)
 
 	tmpFile := filepath.Join(tempDir, "test.tmp")
-	os.WriteFile(tmpFile, []byte("tmp"), 0644)
+	_ = os.WriteFile(tmpFile, []byte("tmp"), 0644)
 
 	// Test cleanup (recent files should not be removed)
 	count, err := cleanupLockFiles(cfg, false)

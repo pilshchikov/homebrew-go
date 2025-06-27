@@ -6,20 +6,21 @@ import (
 	"path/filepath"
 	"testing"
 
+	"strings"
+
 	"github.com/pilshchikov/homebrew-go/internal/config"
 	"github.com/pilshchikov/homebrew-go/internal/logger"
-	"strings"
 )
 
 func TestManagerOperations(t *testing.T) {
 	// Initialize logger for tests
 	logger.Init(false, false, true)
-	
+
 	tempDir, err := os.MkdirTemp("", "tap-test")
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
-	defer os.RemoveAll(tempDir)
+	defer func() { _ = os.RemoveAll(tempDir) }()
 
 	cfg := &config.Config{
 		HomebrewRepository: tempDir,
@@ -37,22 +38,22 @@ func TestManagerOperations(t *testing.T) {
 
 func TestListTapsEmpty(t *testing.T) {
 	logger.Init(false, false, true)
-	
+
 	tempDir, err := os.MkdirTemp("", "tap-test-empty")
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
-	defer os.RemoveAll(tempDir)
+	defer func() { _ = os.RemoveAll(tempDir) }()
 
 	cfg := &config.Config{
 		HomebrewRepository: tempDir,
 	}
 
 	manager := NewManager(cfg)
-	
+
 	// Create the Taps directory but leave it empty
 	tapsDir := filepath.Join(tempDir, "Library", "Taps")
-	os.MkdirAll(tapsDir, 0755)
+	_ = os.MkdirAll(tapsDir, 0755)
 
 	taps, err := manager.ListTaps()
 	if err != nil {
@@ -66,12 +67,12 @@ func TestListTapsEmpty(t *testing.T) {
 
 func TestGetTapNonExistent(t *testing.T) {
 	logger.Init(false, false, true)
-	
+
 	tempDir, err := os.MkdirTemp("", "tap-test-get")
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
-	defer os.RemoveAll(tempDir)
+	defer func() { _ = os.RemoveAll(tempDir) }()
 
 	cfg := &config.Config{
 		HomebrewRepository: tempDir,
@@ -176,7 +177,7 @@ func TestIsTapDirectoryIntegration(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
-	defer os.RemoveAll(tempDir)
+	defer func() { _ = os.RemoveAll(tempDir) }()
 
 	manager := &Manager{}
 
@@ -187,21 +188,21 @@ func TestIsTapDirectoryIntegration(t *testing.T) {
 
 	// Test directory without Formula or Casks
 	emptyDir := filepath.Join(tempDir, "empty")
-	os.MkdirAll(emptyDir, 0755)
+	_ = os.MkdirAll(emptyDir, 0755)
 	if manager.isTapDirectory(emptyDir) {
 		t.Error("Empty directory should not be a tap directory")
 	}
 
 	// Test directory with Formula subdirectory
 	formulaDir := filepath.Join(tempDir, "with-formula")
-	os.MkdirAll(filepath.Join(formulaDir, "Formula"), 0755)
+	_ = os.MkdirAll(filepath.Join(formulaDir, "Formula"), 0755)
 	if !manager.isTapDirectory(formulaDir) {
 		t.Error("Directory with Formula subdirectory should be a tap directory")
 	}
 
 	// Test directory with Casks subdirectory
 	casksDir := filepath.Join(tempDir, "with-casks")
-	os.MkdirAll(filepath.Join(casksDir, "Casks"), 0755)
+	_ = os.MkdirAll(filepath.Join(casksDir, "Casks"), 0755)
 	if !manager.isTapDirectory(casksDir) {
 		t.Error("Directory with Casks subdirectory should be a tap directory")
 	}
@@ -212,31 +213,31 @@ func TestCountFormulaeAndCasks(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
-	defer os.RemoveAll(tempDir)
+	defer func() { _ = os.RemoveAll(tempDir) }()
 
 	manager := &Manager{}
 
 	// Create test tap structure
 	formulaDir := filepath.Join(tempDir, "Formula")
 	casksDir := filepath.Join(tempDir, "Casks")
-	os.MkdirAll(formulaDir, 0755)
-	os.MkdirAll(casksDir, 0755)
+	_ = os.MkdirAll(formulaDir, 0755)
+	_ = os.MkdirAll(casksDir, 0755)
 
 	// Create some formula files
 	for i := 0; i < 3; i++ {
 		filename := filepath.Join(formulaDir, fmt.Sprintf("formula%d.rb", i))
-		os.WriteFile(filename, []byte("# formula"), 0644)
+		_ = os.WriteFile(filename, []byte("# formula"), 0644)
 	}
 
 	// Create some cask files
 	for i := 0; i < 2; i++ {
 		filename := filepath.Join(casksDir, fmt.Sprintf("cask%d.rb", i))
-		os.WriteFile(filename, []byte("# cask"), 0644)
+		_ = os.WriteFile(filename, []byte("# cask"), 0644)
 	}
 
 	// Create non-Ruby files (should be ignored)
-	os.WriteFile(filepath.Join(formulaDir, "readme.txt"), []byte("readme"), 0644)
-	os.WriteFile(filepath.Join(casksDir, "info.md"), []byte("info"), 0644)
+	_ = os.WriteFile(filepath.Join(formulaDir, "readme.txt"), []byte("readme"), 0644)
+	_ = os.WriteFile(filepath.Join(casksDir, "info.md"), []byte("info"), 0644)
 
 	// Test counting
 	formulaeCount := manager.countFormulae(tempDir)
@@ -266,14 +267,14 @@ func TestVerifyTapIntegration(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
-	defer os.RemoveAll(tempDir)
+	defer func() { _ = os.RemoveAll(tempDir) }()
 
 	manager := &Manager{}
 
 	// Test invalid tap (no Formula or Casks)
 	emptyDir := filepath.Join(tempDir, "empty")
-	os.MkdirAll(emptyDir, 0755)
-	
+	_ = os.MkdirAll(emptyDir, 0755)
+
 	err = manager.verifyTap(emptyDir)
 	if err == nil {
 		t.Error("Expected error for invalid tap")
@@ -281,8 +282,8 @@ func TestVerifyTapIntegration(t *testing.T) {
 
 	// Test valid tap with Formula
 	validDir := filepath.Join(tempDir, "valid")
-	os.MkdirAll(filepath.Join(validDir, "Formula"), 0755)
-	
+	_ = os.MkdirAll(filepath.Join(validDir, "Formula"), 0755)
+
 	err = manager.verifyTap(validDir)
 	if err != nil {
 		t.Errorf("Expected no error for valid tap: %v", err)
@@ -290,8 +291,8 @@ func TestVerifyTapIntegration(t *testing.T) {
 
 	// Test valid tap with Casks
 	validCasksDir := filepath.Join(tempDir, "valid-casks")
-	os.MkdirAll(filepath.Join(validCasksDir, "Casks"), 0755)
-	
+	_ = os.MkdirAll(filepath.Join(validCasksDir, "Casks"), 0755)
+
 	err = manager.verifyTap(validCasksDir)
 	if err != nil {
 		t.Errorf("Expected no error for valid casks tap: %v", err)
@@ -304,7 +305,7 @@ func TestProgressWriter(t *testing.T) {
 	// Test writing some data
 	data := []byte("test progress message\n")
 	n, err := writer.Write(data)
-	
+
 	if err != nil {
 		t.Errorf("ProgressWriter.Write failed: %v", err)
 	}
@@ -331,7 +332,7 @@ func TestAddTap(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
-	defer os.RemoveAll(tempDir)
+	defer func() { _ = os.RemoveAll(tempDir) }()
 
 	cfg := &config.Config{
 		HomebrewRepository: tempDir,
@@ -388,7 +389,7 @@ func TestRemoveTap(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
-	defer os.RemoveAll(tempDir)
+	defer func() { _ = os.RemoveAll(tempDir) }()
 
 	cfg := &config.Config{
 		HomebrewRepository: tempDir,
@@ -408,11 +409,11 @@ func TestRemoveTap(t *testing.T) {
 
 	// Create a mock tap structure
 	tapPath := filepath.Join(tempDir, "Library", "Taps", "test", "homebrew-example")
-	os.MkdirAll(filepath.Join(tapPath, "Formula"), 0755)
+	_ = os.MkdirAll(filepath.Join(tapPath, "Formula"), 0755)
 
 	// Create a formula file
 	formulaFile := filepath.Join(tapPath, "Formula", "testformula.rb")
-	os.WriteFile(formulaFile, []byte("# test formula"), 0644)
+	_ = os.WriteFile(formulaFile, []byte("# test formula"), 0644)
 
 	// Test removing tap without installed formulae
 	err = manager.RemoveTap("test/example", nil)
@@ -433,7 +434,7 @@ func TestUpdateTap(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
-	defer os.RemoveAll(tempDir)
+	defer func() { _ = os.RemoveAll(tempDir) }()
 
 	cfg := &config.Config{
 		HomebrewRepository: tempDir,
@@ -452,7 +453,7 @@ func TestUpdateTap(t *testing.T) {
 
 	// Create a mock tap structure without git repo
 	tapPath := filepath.Join(tempDir, "Library", "Taps", "test", "homebrew-example")
-	os.MkdirAll(filepath.Join(tapPath, "Formula"), 0755)
+	_ = os.MkdirAll(filepath.Join(tapPath, "Formula"), 0755)
 
 	// Test updating tap without git repository
 	err = manager.UpdateTap("test/example")
@@ -471,7 +472,7 @@ func TestGetInstalledFormulaeFromTap(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
-	defer os.RemoveAll(tempDir)
+	defer func() { _ = os.RemoveAll(tempDir) }()
 
 	cfg := &config.Config{
 		HomebrewRepository: tempDir,
@@ -483,18 +484,18 @@ func TestGetInstalledFormulaeFromTap(t *testing.T) {
 	// Create a mock tap structure
 	tapPath := filepath.Join(tempDir, "Library", "Taps", "test", "homebrew-example")
 	formulaDir := filepath.Join(tapPath, "Formula")
-	os.MkdirAll(formulaDir, 0755)
+	_ = os.MkdirAll(formulaDir, 0755)
 
 	// Create some formula files
 	formulas := []string{"formula1", "formula2", "formula3"}
 	for _, formula := range formulas {
 		formulaFile := filepath.Join(formulaDir, formula+".rb")
-		os.WriteFile(formulaFile, []byte("# "+formula), 0644)
+		_ = os.WriteFile(formulaFile, []byte("# "+formula), 0644)
 	}
 
 	// Create cellar structure with one installed formula
 	cellarDir := filepath.Join(tempDir, "Cellar", "formula1")
-	os.MkdirAll(cellarDir, 0755)
+	_ = os.MkdirAll(cellarDir, 0755)
 
 	tap := &Tap{
 		Name: "test/example",
@@ -523,7 +524,7 @@ func TestIsFormulaFromTap(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
-	defer os.RemoveAll(tempDir)
+	defer func() { _ = os.RemoveAll(tempDir) }()
 
 	cfg := &config.Config{
 		HomebrewRepository: tempDir,
@@ -534,11 +535,11 @@ func TestIsFormulaFromTap(t *testing.T) {
 	// Create a mock tap structure
 	tapPath := filepath.Join(tempDir, "Library", "Taps", "test", "homebrew-example")
 	formulaDir := filepath.Join(tapPath, "Formula")
-	os.MkdirAll(formulaDir, 0755)
+	_ = os.MkdirAll(formulaDir, 0755)
 
 	// Create a formula file
 	formulaFile := filepath.Join(formulaDir, "testformula.rb")
-	os.WriteFile(formulaFile, []byte("# test formula"), 0644)
+	_ = os.WriteFile(formulaFile, []byte("# test formula"), 0644)
 
 	// Test formula that exists in tap
 	if !manager.isFormulaFromTap("testformula", "test/example") {
@@ -552,7 +553,7 @@ func TestIsFormulaFromTap(t *testing.T) {
 
 	// Test YAML formula
 	yamlFile := filepath.Join(formulaDir, "yamlformula.yaml")
-	os.WriteFile(yamlFile, []byte("# yaml formula"), 0644)
+	_ = os.WriteFile(yamlFile, []byte("# yaml formula"), 0644)
 
 	if !manager.isFormulaFromTap("yamlformula", "test/example") {
 		t.Error("Expected yamlformula to be from test/example tap")
@@ -566,7 +567,7 @@ func TestTapGetFormula(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
-	defer os.RemoveAll(tempDir)
+	defer func() { _ = os.RemoveAll(tempDir) }()
 
 	tap := &Tap{
 		Name: "test/example",
@@ -574,7 +575,7 @@ func TestTapGetFormula(t *testing.T) {
 	}
 
 	formulaDir := filepath.Join(tempDir, "Formula")
-	os.MkdirAll(formulaDir, 0755)
+	_ = os.MkdirAll(formulaDir, 0755)
 
 	// Test formula not found
 	_, err = tap.GetFormula("nonexistent")
@@ -587,7 +588,7 @@ func TestTapGetFormula(t *testing.T) {
 
 	// Create a Ruby formula file (should indicate not implemented)
 	rubyFile := filepath.Join(formulaDir, "rubyformula.rb")
-	os.WriteFile(rubyFile, []byte("# ruby formula"), 0644)
+	_ = os.WriteFile(rubyFile, []byte("# ruby formula"), 0644)
 
 	_, err = tap.GetFormula("rubyformula")
 	if err == nil {
@@ -600,7 +601,7 @@ func TestTapGetFormula(t *testing.T) {
 	// Test YAML formula (would need actual YAML content for parsing)
 	yamlFile := filepath.Join(formulaDir, "yamlformula.yaml")
 	invalidYaml := []byte("invalid: yaml: content")
-	os.WriteFile(yamlFile, invalidYaml, 0644)
+	_ = os.WriteFile(yamlFile, invalidYaml, 0644)
 
 	_, err = tap.GetFormula("yamlformula")
 	if err == nil {
@@ -618,7 +619,7 @@ func TestTapListFormulae(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
-	defer os.RemoveAll(tempDir)
+	defer func() { _ = os.RemoveAll(tempDir) }()
 
 	tap := &Tap{
 		Name: "test/example",
@@ -626,7 +627,7 @@ func TestTapListFormulae(t *testing.T) {
 	}
 
 	formulaDir := filepath.Join(tempDir, "Formula")
-	os.MkdirAll(formulaDir, 0755)
+	_ = os.MkdirAll(formulaDir, 0755)
 
 	// Test empty formula directory
 	formulae, err := tap.ListFormulae()
@@ -650,9 +651,9 @@ func TestTapListFormulae(t *testing.T) {
 	for _, filename := range formulaFiles {
 		filePath := filepath.Join(formulaDir, filename)
 		if filename == "subdir" {
-			os.MkdirAll(filePath, 0755)
+			_ = os.MkdirAll(filePath, 0755)
 		} else {
-			os.WriteFile(filePath, []byte("# "+filename), 0644)
+			_ = os.WriteFile(filePath, []byte("# "+filename), 0644)
 		}
 	}
 

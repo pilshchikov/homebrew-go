@@ -178,7 +178,7 @@ func Question(format string, args ...interface{}) string {
 		fmt.Print(message)
 	}
 	var response string
-	fmt.Scanln(&response)
+	_, _ = fmt.Scanln(&response)
 	return strings.TrimSpace(response)
 }
 
@@ -208,7 +208,7 @@ func (p *ProgressSpinner) Start() {
 	if currentLevel > InfoLevel {
 		return
 	}
-	
+
 	go func() {
 		spinners := []string{"|", "/", "-", "\\"}
 		i := 0
@@ -230,7 +230,7 @@ func (p *ProgressSpinner) Stop() {
 	if currentLevel > InfoLevel {
 		return
 	}
-	
+
 	p.done <- true
 	fmt.Print("\r")
 }
@@ -250,7 +250,7 @@ func LogDetailedError(ctx ErrorContext) {
 	if currentLevel > ErrorLevel {
 		return
 	}
-	
+
 	errorLogger.Printf("\033[31m==> Error: %s failed\033[0m", ctx.Operation)
 	if ctx.Formula != "" {
 		errorLogger.Printf("Formula: %s", ctx.Formula)
@@ -262,7 +262,7 @@ func LogDetailedError(ctx ErrorContext) {
 		errorLogger.Printf("Platform: %s", ctx.Platform)
 	}
 	errorLogger.Printf("Reason: %v", ctx.Error)
-	
+
 	if len(ctx.Suggestions) > 0 {
 		errorLogger.Printf("\nSuggestions:")
 		for _, suggestion := range ctx.Suggestions {

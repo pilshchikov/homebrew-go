@@ -11,8 +11,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/pilshchikov/homebrew-go/internal/config"
 	"github.com/pilshchikov/homebrew-go/internal/cask"
+	"github.com/pilshchikov/homebrew-go/internal/config"
 	"github.com/pilshchikov/homebrew-go/internal/formula"
 	"github.com/pilshchikov/homebrew-go/internal/logger"
 	"github.com/pilshchikov/homebrew-go/internal/utils"
@@ -26,62 +26,66 @@ type Client struct {
 	userAgent  string
 }
 
+const (
+	archARM64 = "arm64"
+)
+
 // FormulaAPIResponse represents the API response for a formula
 type FormulaAPIResponse struct {
-	Name                string                 `json:"name"`
-	FullName            string                 `json:"full_name"`
-	Tap                 string                 `json:"tap"`
-	Oldname             string                 `json:"oldname,omitempty"`
-	Aliases             []string               `json:"aliases"`
-	VersionedFormulae   []string               `json:"versioned_formulae"`
-	Desc                string                 `json:"desc"`
-	License             string                 `json:"license"`
-	Homepage            string                 `json:"homepage"`
-	Versions            map[string]interface{} `json:"versions"`
-	Urls                map[string]interface{} `json:"urls"`
-	Revision            int                    `json:"revision"`
-	VersionScheme       int                    `json:"version_scheme"`
-	Bottle              map[string]interface{} `json:"bottle"`
-	KegOnly             bool                   `json:"keg_only"`
-	KegOnlyReason       map[string]string      `json:"keg_only_reason,omitempty"`
-	Options             []interface{}          `json:"options"`
-	BuildDependencies   []string               `json:"build_dependencies"`
-	Dependencies        []string               `json:"dependencies"`
-	TestDependencies    []string               `json:"test_dependencies"`
-	RecommendedDependencies []string           `json:"recommended_dependencies"`
-	OptionalDependencies    []string           `json:"optional_dependencies"`
-	UsesFromMacos       []interface{}          `json:"uses_from_macos"`
-	Requirements        []interface{}          `json:"requirements"`
-	ConflictsWith       []string               `json:"conflicts_with"`
-	ConflictsWithReasons []string              `json:"conflicts_with_reasons"`
-	LinkOverwrite       []string               `json:"link_overwrite"`
-	Caveats             string                 `json:"caveats,omitempty"`
-	Installed           []interface{}          `json:"installed"`
-	LinkedKeg           string                 `json:"linked_keg,omitempty"`
-	Pinned              bool                   `json:"pinned"`
-	Outdated            bool                   `json:"outdated"`
-	Deprecated          bool                   `json:"deprecated"`
-	DeprecationDate     string                 `json:"deprecation_date,omitempty"`
-	DeprecationReason   string                 `json:"deprecation_reason,omitempty"`
-	Disabled            bool                   `json:"disabled"`
-	DisableDate         string                 `json:"disable_date,omitempty"`
-	DisableReason       string                 `json:"disable_reason,omitempty"`
-	PostInstallDefined  bool                   `json:"post_install_defined"`
-	Service             map[string]interface{} `json:"service,omitempty"`
-	TapGitHead          string                 `json:"tap_git_head"`
-	RubySourcePath      string                 `json:"ruby_source_path"`
-	RubySourceChecksum  map[string]string      `json:"ruby_source_checksum"`
+	Name                    string                 `json:"name"`
+	FullName                string                 `json:"full_name"`
+	Tap                     string                 `json:"tap"`
+	Oldname                 string                 `json:"oldname,omitempty"`
+	Aliases                 []string               `json:"aliases"`
+	VersionedFormulae       []string               `json:"versioned_formulae"`
+	Desc                    string                 `json:"desc"`
+	License                 string                 `json:"license"`
+	Homepage                string                 `json:"homepage"`
+	Versions                map[string]interface{} `json:"versions"`
+	Urls                    map[string]interface{} `json:"urls"`
+	Revision                int                    `json:"revision"`
+	VersionScheme           int                    `json:"version_scheme"`
+	Bottle                  map[string]interface{} `json:"bottle"`
+	KegOnly                 bool                   `json:"keg_only"`
+	KegOnlyReason           map[string]string      `json:"keg_only_reason,omitempty"`
+	Options                 []interface{}          `json:"options"`
+	BuildDependencies       []string               `json:"build_dependencies"`
+	Dependencies            []string               `json:"dependencies"`
+	TestDependencies        []string               `json:"test_dependencies"`
+	RecommendedDependencies []string               `json:"recommended_dependencies"`
+	OptionalDependencies    []string               `json:"optional_dependencies"`
+	UsesFromMacos           []interface{}          `json:"uses_from_macos"`
+	Requirements            []interface{}          `json:"requirements"`
+	ConflictsWith           []string               `json:"conflicts_with"`
+	ConflictsWithReasons    []string               `json:"conflicts_with_reasons"`
+	LinkOverwrite           []string               `json:"link_overwrite"`
+	Caveats                 string                 `json:"caveats,omitempty"`
+	Installed               []interface{}          `json:"installed"`
+	LinkedKeg               string                 `json:"linked_keg,omitempty"`
+	Pinned                  bool                   `json:"pinned"`
+	Outdated                bool                   `json:"outdated"`
+	Deprecated              bool                   `json:"deprecated"`
+	DeprecationDate         string                 `json:"deprecation_date,omitempty"`
+	DeprecationReason       string                 `json:"deprecation_reason,omitempty"`
+	Disabled                bool                   `json:"disabled"`
+	DisableDate             string                 `json:"disable_date,omitempty"`
+	DisableReason           string                 `json:"disable_reason,omitempty"`
+	PostInstallDefined      bool                   `json:"post_install_defined"`
+	Service                 map[string]interface{} `json:"service,omitempty"`
+	TapGitHead              string                 `json:"tap_git_head"`
+	RubySourcePath          string                 `json:"ruby_source_path"`
+	RubySourceChecksum      map[string]string      `json:"ruby_source_checksum"`
 }
 
 // SearchResult represents a search result
 type SearchResult struct {
-	Name        string `json:"name"`
-	FullName    string `json:"full_name"`
-	Tap         string `json:"tap"`
-	Desc        string `json:"desc"`
-	Homepage    string `json:"homepage"`
-	Deprecated  bool   `json:"deprecated"`
-	Disabled    bool   `json:"disabled"`
+	Name       string `json:"name"`
+	FullName   string `json:"full_name"`
+	Tap        string `json:"tap"`
+	Desc       string `json:"desc"`
+	Homepage   string `json:"homepage"`
+	Deprecated bool   `json:"deprecated"`
+	Disabled   bool   `json:"disabled"`
 }
 
 // NewClient creates a new API client
@@ -91,7 +95,7 @@ func NewClient(cfg *config.Config) *Client {
 		apiDomain = "https://formulae.brew.sh/api"
 	}
 
-	userAgent := fmt.Sprintf("Homebrew-Go/3.0.0 (%s; %s) Go/%s", 
+	userAgent := fmt.Sprintf("Homebrew-Go/3.0.0 (%s; %s) Go/%s",
 		runtime.GOOS, runtime.GOARCH, "1.20")
 
 	return &Client{
@@ -107,62 +111,62 @@ func NewClient(cfg *config.Config) *Client {
 // GetFormula fetches formula data from the API
 func (c *Client) GetFormula(name string) (*formula.Formula, error) {
 	logger.Debug("Fetching formula %s from API", name)
-	
+
 	url := fmt.Sprintf("%s/formula/%s.json", c.apiDomain, name)
-	
-	req, err := http.NewRequest("GET", url, nil)
+
+	req, err := http.NewRequest("GET", url, http.NoBody)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create request: %w", err)
 	}
-	
+
 	req.Header.Set("User-Agent", c.userAgent)
 	req.Header.Set("Accept", "application/json")
-	
+
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch formula: %w", err)
 	}
-	defer resp.Body.Close()
-	
+	defer func() { _ = resp.Body.Close() }()
+
 	if resp.StatusCode == 404 {
 		return nil, fmt.Errorf("formula %s not found", name)
 	}
-	
+
 	if resp.StatusCode != 200 {
 		return nil, fmt.Errorf("API request failed with status %d", resp.StatusCode)
 	}
-	
+
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read response body: %w", err)
 	}
-	
+
 	var apiResponse FormulaAPIResponse
 	if err := json.Unmarshal(body, &apiResponse); err != nil {
 		return nil, fmt.Errorf("failed to parse JSON response: %w", err)
 	}
-	
+
 	// Convert API response to our Formula struct
 	f := &formula.Formula{
-		Name:        apiResponse.Name,
-		FullName:    apiResponse.FullName,
-		Description: apiResponse.Desc,
-		Homepage:    apiResponse.Homepage,
-		License:     apiResponse.License,
-		Dependencies: apiResponse.Dependencies,
+		Name:              apiResponse.Name,
+		FullName:          apiResponse.FullName,
+		Description:       apiResponse.Desc,
+		Homepage:          apiResponse.Homepage,
+		License:           apiResponse.License,
+		Dependencies:      apiResponse.Dependencies,
 		BuildDependencies: apiResponse.BuildDependencies,
 		TestDependencies:  apiResponse.TestDependencies,
-		Caveats:     apiResponse.Caveats,
-		KegOnly:     apiResponse.KegOnly,
-		Deprecated:  apiResponse.Deprecated,
-		Disabled:    apiResponse.Disabled,
+		Caveats:           apiResponse.Caveats,
+		KegOnly:           apiResponse.KegOnly,
+		Deprecated:        apiResponse.Deprecated,
+		Disabled:          apiResponse.Disabled,
 	}
-	
+
 	// Extract version information
 	if versions, ok := apiResponse.Versions["stable"].(string); ok {
 		f.Version = versions
 	}
-	
+
 	// Extract URL information
 	if urls, ok := apiResponse.Urls["stable"].(map[string]interface{}); ok {
 		if url, ok := urls["url"].(string); ok {
@@ -172,7 +176,7 @@ func (c *Client) GetFormula(name string) (*formula.Formula, error) {
 			f.SHA256 = sha256
 		}
 	}
-	
+
 	// Extract bottle information
 	if bottle, ok := apiResponse.Bottle["stable"].(map[string]interface{}); ok {
 		if files, ok := bottle["files"].(map[string]interface{}); ok {
@@ -182,7 +186,7 @@ func (c *Client) GetFormula(name string) (*formula.Formula, error) {
 					Files:   make(map[string]formula.BottleFile),
 				},
 			}
-			
+
 			for platform, fileInfo := range files {
 				if fileData, ok := fileInfo.(map[string]interface{}); ok {
 					bottleFile := formula.BottleFile{}
@@ -197,7 +201,7 @@ func (c *Client) GetFormula(name string) (*formula.Formula, error) {
 			}
 		}
 	}
-	
+
 	logger.Debug("Successfully fetched formula %s", name)
 	return f, nil
 }
@@ -205,17 +209,17 @@ func (c *Client) GetFormula(name string) (*formula.Formula, error) {
 // SearchFormulae searches for formulae by name or description
 func (c *Client) SearchFormulae(query string) ([]SearchResult, error) {
 	logger.Debug("Searching formulae for: %s", query)
-	
+
 	// For now, we'll fetch all formulae and filter locally
 	// In a production implementation, we'd use a dedicated search endpoint
 	formulaeList, err := c.listAllFormulae()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get formulae list: %w", err)
 	}
-	
+
 	var results []SearchResult
 	query = strings.ToLower(query)
-	
+
 	for _, formulaName := range formulaeList {
 		if strings.Contains(strings.ToLower(formulaName), query) {
 			// Fetch detailed info for matching formulae
@@ -234,7 +238,7 @@ func (c *Client) SearchFormulae(query string) ([]SearchResult, error) {
 			}
 		}
 	}
-	
+
 	logger.Debug("Found %d formulae matching '%s'", len(results), query)
 	return results, nil
 }
@@ -248,48 +252,48 @@ func (c *Client) listAllFormulae() ([]string, error) {
 			return names, nil
 		}
 	}
-	
+
 	// Fetch from API
 	url := fmt.Sprintf("%s/formula.json", c.apiDomain)
-	
-	req, err := http.NewRequest("GET", url, nil)
+
+	req, err := http.NewRequest("GET", url, http.NoBody)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create request: %w", err)
 	}
-	
+
 	req.Header.Set("User-Agent", c.userAgent)
 	req.Header.Set("Accept", "application/json")
-	
+
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch formulae list: %w", err)
 	}
-	defer resp.Body.Close()
-	
+	defer func() { _ = resp.Body.Close() }()
+
 	if resp.StatusCode != 200 {
 		return nil, fmt.Errorf("API request failed with status %d", resp.StatusCode)
 	}
-	
+
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read response body: %w", err)
 	}
-	
+
 	var formulae []map[string]interface{}
 	if err := json.Unmarshal(body, &formulae); err != nil {
 		return nil, fmt.Errorf("failed to parse JSON response: %w", err)
 	}
-	
+
 	var names []string
 	for _, f := range formulae {
 		if name, ok := f["name"].(string); ok {
 			names = append(names, name)
 		}
 	}
-	
+
 	// Cache the results
 	c.cacheNames(cacheFile, names)
-	
+
 	return names, nil
 }
 
@@ -299,7 +303,7 @@ func (c *Client) isCacheValid(filename string) bool {
 	if os.IsNotExist(err) {
 		return false
 	}
-	
+
 	// Cache is valid for 1 hour
 	return time.Since(info.ModTime()) < time.Hour
 }
@@ -310,7 +314,7 @@ func (c *Client) readCachedNames(filename string) ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	
+
 	names := strings.Split(strings.TrimSpace(string(data)), "\n")
 	return names, nil
 }
@@ -322,9 +326,9 @@ func (c *Client) cacheNames(filename string, names []string) {
 		logger.Warn("Failed to create cache directory: %v", err)
 		return
 	}
-	
+
 	data := strings.Join(names, "\n")
-	if err := os.WriteFile(filename, []byte(data), 0644); err != nil {
+	if err := os.WriteFile(filename, []byte(data), 0600); err != nil {
 		logger.Warn("Failed to cache formulae names: %v", err)
 	}
 }
@@ -334,76 +338,76 @@ func (c *Client) DownloadBottle(formula *formula.Formula, platform string) (stri
 	if formula.Bottle == nil || formula.Bottle.Stable == nil {
 		return "", fmt.Errorf("no bottle available for %s", formula.Name)
 	}
-	
+
 	bottleFile, exists := formula.Bottle.Stable.Files[platform]
 	if !exists {
 		return "", fmt.Errorf("no bottle available for platform %s", platform)
 	}
-	
+
 	logger.Progress("Downloading bottle for %s", formula.Name)
-	
+
 	// Create download directory
 	downloadDir := filepath.Join(c.config.HomebrewCache, "downloads")
 	if err := os.MkdirAll(downloadDir, 0755); err != nil {
 		return "", fmt.Errorf("failed to create download directory: %w", err)
 	}
-	
+
 	// Generate filename
-	filename := fmt.Sprintf("%s-%s.%s.bottle.tar.gz", 
+	filename := fmt.Sprintf("%s-%s.%s.bottle.tar.gz",
 		formula.Name, formula.Version, platform)
 	filepath := filepath.Join(downloadDir, filename)
-	
+
 	// Check if already downloaded and verified
 	if c.isFileValid(filepath, bottleFile.SHA256) {
 		logger.Debug("Using cached bottle: %s", filename)
 		return filepath, nil
 	}
-	
+
 	// Download the bottle
-	req, err := http.NewRequest("GET", bottleFile.URL, nil)
+	req, err := http.NewRequest("GET", bottleFile.URL, http.NoBody)
 	if err != nil {
 		return "", fmt.Errorf("failed to create request: %w", err)
 	}
-	
+
 	req.Header.Set("User-Agent", c.userAgent)
-	
+
 	// Add authentication for GitHub Container Registry if needed
 	if strings.Contains(bottleFile.URL, "ghcr.io") {
-		if err := c.addGHCRAuth(req); err != nil {
-			logger.Debug("GHCR authentication failed: %v", err)
+		if authErr := c.addGHCRAuth(req); authErr != nil {
+			logger.Debug("GHCR authentication failed: %v", authErr)
 			// Continue without auth - bottles should be public
 		}
 	}
-	
+
 	// Attempt download with retry logic for authentication issues
 	resp, err := c.downloadWithRetry(req, bottleFile.URL)
 	if err != nil {
 		return "", fmt.Errorf("failed to download bottle: %w", err)
 	}
-	defer resp.Body.Close()
-	
+	defer func() { _ = resp.Body.Close() }()
+
 	if resp.StatusCode != 200 {
 		return "", fmt.Errorf("download failed with status %d for %s", resp.StatusCode, bottleFile.URL)
 	}
-	
+
 	// Save to file
 	file, err := os.Create(filepath)
 	if err != nil {
 		return "", fmt.Errorf("failed to create file: %w", err)
 	}
-	defer file.Close()
-	
+	defer func() { _ = file.Close() }()
+
 	_, err = io.Copy(file, resp.Body)
 	if err != nil {
 		return "", fmt.Errorf("failed to save bottle: %w", err)
 	}
-	
+
 	// Verify checksum
 	if !c.isFileValid(filepath, bottleFile.SHA256) {
-		os.Remove(filepath)
+		_ = os.Remove(filepath)
 		return "", fmt.Errorf("bottle checksum verification failed")
 	}
-	
+
 	logger.Success("Downloaded bottle: %s", filename)
 	return filepath, nil
 }
@@ -413,11 +417,11 @@ func (c *Client) isFileValid(filepath, expectedSHA256 string) bool {
 	if _, err := os.Stat(filepath); os.IsNotExist(err) {
 		return false
 	}
-	
+
 	if expectedSHA256 == "" {
 		return true // No checksum to verify
 	}
-	
+
 	// Verify SHA256 checksum
 	return utils.VerifySHA256(filepath, expectedSHA256) == nil
 }
@@ -430,11 +434,11 @@ func (c *Client) addGHCRAuth(req *http.Request) error {
 		req.Header.Set("Authorization", "Bearer "+token)
 		return nil
 	}
-	
+
 	// For public repositories, try to get an anonymous token
 	// This follows the Docker Registry v2 authentication flow
 	authURL := "https://ghcr.io/token"
-	
+
 	// Extract repository from the request URL to build proper scope
 	repository := "homebrew/core" // Default for Homebrew bottles
 	if strings.Contains(req.URL.Path, "homebrew") {
@@ -444,75 +448,75 @@ func (c *Client) addGHCRAuth(req *http.Request) error {
 			repository = strings.Join(parts[1:3], "/")
 		}
 	}
-	
+
 	scope := fmt.Sprintf("repository:%s:pull", repository)
 	tokenURL := fmt.Sprintf("%s?service=ghcr.io&scope=%s", authURL, scope)
-	
+
 	logger.Debug("Requesting GHCR token for scope: %s", scope)
-	
-	tokenReq, err := http.NewRequest("GET", tokenURL, nil)
+
+	tokenReq, err := http.NewRequest("GET", tokenURL, http.NoBody)
 	if err != nil {
 		return fmt.Errorf("failed to create token request: %w", err)
 	}
-	
+
 	// Set appropriate headers for token request
 	tokenReq.Header.Set("User-Agent", c.userAgent)
 	tokenReq.Header.Set("Accept", "application/json")
-	
+
 	tokenResp, err := c.httpClient.Do(tokenReq)
 	if err != nil {
 		return fmt.Errorf("failed to get GHCR token: %w", err)
 	}
-	defer tokenResp.Body.Close()
-	
+	defer func() { _ = tokenResp.Body.Close() }()
+
 	if tokenResp.StatusCode != 200 {
 		// Log the error but don't fail - some public repos might work without auth
 		logger.Debug("GHCR token request failed with status %d, continuing without auth", tokenResp.StatusCode)
 		return nil
 	}
-	
+
 	body, err := io.ReadAll(tokenResp.Body)
 	if err != nil {
 		logger.Debug("Failed to read GHCR token response: %v", err)
 		return nil // Continue without auth
 	}
-	
+
 	var tokenResponse struct {
-		Token        string `json:"token"`
-		AccessToken  string `json:"access_token"`
-		ExpiresIn    int    `json:"expires_in"`
-		IssuedAt     string `json:"issued_at"`
+		Token       string `json:"token"`
+		AccessToken string `json:"access_token"`
+		ExpiresIn   int    `json:"expires_in"`
+		IssuedAt    string `json:"issued_at"`
 	}
-	
+
 	if err := json.Unmarshal(body, &tokenResponse); err != nil {
 		logger.Debug("Failed to parse GHCR token response: %v", err)
 		return nil // Continue without auth
 	}
-	
+
 	// Use either token or access_token field
 	token := tokenResponse.Token
 	if token == "" {
 		token = tokenResponse.AccessToken
 	}
-	
+
 	if token != "" {
 		logger.Debug("Successfully obtained GHCR token")
 		req.Header.Set("Authorization", "Bearer "+token)
 	} else {
 		logger.Debug("No token received from GHCR, continuing without auth")
 	}
-	
+
 	return nil
 }
 
 // downloadWithRetry attempts to download with retry logic for authentication issues
 func (c *Client) downloadWithRetry(req *http.Request, url string) (*http.Response, error) {
 	maxRetries := 2
-	
+
 	for attempt := 0; attempt <= maxRetries; attempt++ {
 		// Clone the request for retry attempts
 		reqClone := req.Clone(req.Context())
-		
+
 		resp, err := c.httpClient.Do(reqClone)
 		if err != nil {
 			if attempt == maxRetries {
@@ -521,12 +525,12 @@ func (c *Client) downloadWithRetry(req *http.Request, url string) (*http.Respons
 			logger.Debug("Download attempt %d failed: %v, retrying...", attempt+1, err)
 			continue
 		}
-		
+
 		// If we get a 401/403 and this is a GHCR URL, try to refresh auth
 		if (resp.StatusCode == 401 || resp.StatusCode == 403) && strings.Contains(url, "ghcr.io") && attempt < maxRetries {
-			resp.Body.Close()
+			_ = resp.Body.Close()
 			logger.Debug("Authentication failed (status %d), refreshing token and retrying...", resp.StatusCode)
-			
+
 			// Clear any existing auth header and re-authenticate
 			reqClone.Header.Del("Authorization")
 			if err := c.addGHCRAuth(reqClone); err != nil {
@@ -534,11 +538,11 @@ func (c *Client) downloadWithRetry(req *http.Request, url string) (*http.Respons
 			}
 			continue
 		}
-		
+
 		// Success or non-auth related error
 		return resp, nil
 	}
-	
+
 	return nil, fmt.Errorf("download failed after %d attempts", maxRetries+1)
 }
 
@@ -547,12 +551,12 @@ func (c *Client) GetPlatformTag() string {
 	// This should match Homebrew's platform detection logic
 	switch runtime.GOOS {
 	case "darwin":
-		if runtime.GOARCH == "arm64" {
+		if runtime.GOARCH == archARM64 {
 			return "arm64_sequoia" // Latest macOS version
 		}
 		return "x86_64_sequoia"
 	case "linux":
-		if runtime.GOARCH == "arm64" {
+		if runtime.GOARCH == archARM64 {
 			return "arm64_linux"
 		}
 		return "x86_64_linux"
@@ -564,26 +568,26 @@ func (c *Client) GetPlatformTag() string {
 // GetCask fetches a specific cask by name from the API
 func (c *Client) GetCask(name string) (*cask.Cask, error) {
 	url := fmt.Sprintf("%s/cask/%s.json", c.apiDomain, name)
-	
+
 	resp, err := http.Get(url)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch cask: %w", err)
 	}
-	defer resp.Body.Close()
-	
+	defer func() { _ = resp.Body.Close() }()
+
 	if resp.StatusCode == http.StatusNotFound {
 		return nil, fmt.Errorf("cask '%s' not found", name)
 	}
-	
+
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("API request failed: %s", resp.Status)
 	}
-	
+
 	var apiResponse map[string]interface{}
 	if err := json.NewDecoder(resp.Body).Decode(&apiResponse); err != nil {
 		return nil, fmt.Errorf("failed to decode API response: %w", err)
 	}
-	
+
 	return c.parseCaskFromAPI(apiResponse)
 }
 
@@ -591,25 +595,25 @@ func (c *Client) GetCask(name string) (*cask.Cask, error) {
 func (c *Client) SearchCasks(query string) ([]*cask.Cask, error) {
 	// For now, use a simple approach - in practice this would use dedicated search endpoints
 	url := fmt.Sprintf("%s/cask.json", c.apiDomain)
-	
+
 	resp, err := http.Get(url)
 	if err != nil {
 		return nil, fmt.Errorf("failed to search casks: %w", err)
 	}
-	defer resp.Body.Close()
-	
+	defer func() { _ = resp.Body.Close() }()
+
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("API request failed: %s", resp.Status)
 	}
-	
+
 	var caskList []map[string]interface{}
 	if err := json.NewDecoder(resp.Body).Decode(&caskList); err != nil {
 		return nil, fmt.Errorf("failed to decode search response: %w", err)
 	}
-	
+
 	var results []*cask.Cask
 	queryLower := strings.ToLower(query)
-	
+
 	for _, caskData := range caskList {
 		// Basic search - check if query matches token or name
 		if token, ok := caskData["token"].(string); ok {
@@ -619,7 +623,7 @@ func (c *Client) SearchCasks(query string) ([]*cask.Cask, error) {
 				}
 			}
 		}
-		
+
 		if name, ok := caskData["name"].(string); ok {
 			if strings.Contains(strings.ToLower(name), queryLower) {
 				if c, err := c.parseCaskFromAPI(caskData); err == nil {
@@ -627,53 +631,53 @@ func (c *Client) SearchCasks(query string) ([]*cask.Cask, error) {
 				}
 			}
 		}
-		
+
 		// Limit results to avoid too many matches
 		if len(results) >= 50 {
 			break
 		}
 	}
-	
+
 	return results, nil
 }
 
 // parseCaskFromAPI converts API response to Cask struct
 func (c *Client) parseCaskFromAPI(apiData map[string]interface{}) (*cask.Cask, error) {
 	caskData := &cask.Cask{}
-	
+
 	// Extract basic information
 	if token, ok := apiData["token"].(string); ok {
 		caskData.Token = token
 	}
-	
+
 	if name, ok := apiData["name"].(string); ok {
 		caskData.Name = name
 	}
-	
+
 	if fullName, ok := apiData["full_name"].(string); ok {
 		caskData.FullName = fullName
 	}
-	
+
 	if homepage, ok := apiData["homepage"].(string); ok {
 		caskData.Homepage = homepage
 	}
-	
+
 	if desc, ok := apiData["desc"].(string); ok {
 		caskData.Description = desc
 	}
-	
+
 	if version, ok := apiData["version"].(string); ok {
 		caskData.Version = version
 	}
-	
+
 	if sha256, ok := apiData["sha256"].(string); ok {
 		caskData.Sha256 = sha256
 	}
-	
+
 	if caveats, ok := apiData["caveats"].(string); ok {
 		caskData.Caveats = caveats
 	}
-	
+
 	// Extract URL information
 	if urlData, ok := apiData["url"].([]interface{}); ok && len(urlData) > 0 {
 		for _, urlItem := range urlData {
@@ -689,11 +693,11 @@ func (c *Client) parseCaskFromAPI(apiData map[string]interface{}) (*cask.Cask, e
 		// Handle simple string URL
 		caskData.URL = []cask.CaskURL{{URL: urlStr}}
 	}
-	
+
 	// Extract artifacts
 	if artifactsData, ok := apiData["artifacts"].([]interface{}); ok && len(artifactsData) > 0 {
 		artifact := cask.CaskArtifact{}
-		
+
 		for _, artifactItem := range artifactsData {
 			if artifactMap, ok := artifactItem.(map[string]interface{}); ok {
 				// Extract apps
@@ -713,7 +717,7 @@ func (c *Client) parseCaskFromAPI(apiData map[string]interface{}) (*cask.Cask, e
 						}
 					}
 				}
-				
+
 				// Extract binaries
 				if binaries, ok := artifactMap["binary"].([]interface{}); ok {
 					for _, binaryItem := range binaries {
@@ -731,7 +735,7 @@ func (c *Client) parseCaskFromAPI(apiData map[string]interface{}) (*cask.Cask, e
 						}
 					}
 				}
-				
+
 				// Extract packages
 				if pkgs, ok := artifactMap["pkg"].([]interface{}); ok {
 					for _, pkgItem := range pkgs {
@@ -742,28 +746,28 @@ func (c *Client) parseCaskFromAPI(apiData map[string]interface{}) (*cask.Cask, e
 				}
 			}
 		}
-		
+
 		caskData.Artifacts = []cask.CaskArtifact{artifact}
 	}
-	
+
 	// Extract dependencies
 	if depsData, ok := apiData["depends_on"].(map[string]interface{}); ok {
 		dep := cask.CaskDependency{}
-		
+
 		if macosData, ok := depsData["macos"].(map[string]interface{}); ok {
 			macos := &cask.CaskMacOSRequirement{}
-			if min, ok := macosData[">="].(string); ok {
-				macos.Minimum = min
+			if minVersion, ok := macosData[">="].(string); ok {
+				macos.Minimum = minVersion
 			}
-			if max, ok := macosData["<="].(string); ok {
-				macos.Maximum = max
+			if maxVersion, ok := macosData["<="].(string); ok {
+				macos.Maximum = maxVersion
 			}
 			if exact, ok := macosData["=="].(string); ok {
 				macos.Exact = exact
 			}
 			dep.Macos = macos
 		}
-		
+
 		if archData, ok := depsData["arch"].([]interface{}); ok {
 			for _, archItem := range archData {
 				if archStr, ok := archItem.(string); ok {
@@ -771,14 +775,14 @@ func (c *Client) parseCaskFromAPI(apiData map[string]interface{}) (*cask.Cask, e
 				}
 			}
 		}
-		
+
 		caskData.Depends = []cask.CaskDependency{dep}
 	}
-	
+
 	// Basic validation
 	if caskData.Token == "" {
 		return nil, fmt.Errorf("invalid cask data: missing token")
 	}
-	
+
 	return caskData, nil
 }

@@ -376,7 +376,7 @@ func TestCask_GetCacheFileName(t *testing.T) {
 
 func TestCask_IsInstalled(t *testing.T) {
 	now := time.Now()
-	
+
 	tests := []struct {
 		name     string
 		cask     *Cask

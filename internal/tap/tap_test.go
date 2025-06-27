@@ -350,16 +350,16 @@ func TestTapOptions(t *testing.T) {
 
 func TestTapStruct(t *testing.T) {
 	tap := &Tap{
-		Name:        "user/repo",
-		FullName:    "homebrew/repo",
-		User:        "user",
-		Repository:  "repo",
-		Remote:      "https://github.com/user/homebrew-repo.git",
-		Path:        "/path/to/tap",
-		Installed:   true,
-		Official:    false,
-		Formulae:    10,
-		Casks:       5,
+		Name:       "user/repo",
+		FullName:   "homebrew/repo",
+		User:       "user",
+		Repository: "repo",
+		Remote:     "https://github.com/user/homebrew-repo.git",
+		Path:       "/path/to/tap",
+		Installed:  true,
+		Official:   false,
+		Formulae:   10,
+		Casks:      5,
 	}
 
 	if tap.Name != "user/repo" {

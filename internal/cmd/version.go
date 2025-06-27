@@ -14,10 +14,18 @@ func NewVersionCmd(cfg *config.Config, version, gitCommit, buildDate string) *co
 		Use:   "version",
 		Short: "Print version information",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			fmt.Fprintf(cmd.OutOrStdout(), "Homebrew %s\n", version)
-			fmt.Fprintf(cmd.OutOrStdout(), "Homebrew/brew (git revision %s; last commit %s)\n", gitCommit, buildDate)
-			fmt.Fprintf(cmd.OutOrStdout(), "Go: %s\n", runtime.Version())
-			fmt.Fprintf(cmd.OutOrStdout(), "Platform: %s\n", runtime.GOOS+"/"+runtime.GOARCH)
+			if _, err := fmt.Fprintf(cmd.OutOrStdout(), "Homebrew %s\n", version); err != nil {
+				return err
+			}
+			if _, err := fmt.Fprintf(cmd.OutOrStdout(), "Homebrew/brew (git revision %s; last commit %s)\n", gitCommit, buildDate); err != nil {
+				return err
+			}
+			if _, err := fmt.Fprintf(cmd.OutOrStdout(), "Go: %s\n", runtime.Version()); err != nil {
+				return err
+			}
+			if _, err := fmt.Fprintf(cmd.OutOrStdout(), "Platform: %s\n", runtime.GOOS+"/"+runtime.GOARCH); err != nil {
+				return err
+			}
 			return nil
 		},
 	}

@@ -22,38 +22,38 @@ type Config struct {
 	HomebrewTemp       string
 
 	// Behavior flags
-	Debug                    bool
-	Verbose                  bool
-	Quiet                    bool
-	AutoUpdate               bool
-	InstallCleanup           bool
-	NoInstallUpgrade         bool
+	Debug                      bool
+	Verbose                    bool
+	Quiet                      bool
+	AutoUpdate                 bool
+	InstallCleanup             bool
+	NoInstallUpgrade           bool
 	NoInstalledDependentsCheck bool
-	DisplayInstallTimes      bool
-	ForceBottle              bool
-	BuildFromSource          bool
-	KeepTmp                  bool
-	Force                    bool
-	DryRun                   bool
+	DisplayInstallTimes        bool
+	ForceBottle                bool
+	BuildFromSource            bool
+	KeepTmp                    bool
+	Force                      bool
+	DryRun                     bool
 
 	// Development flags
-	Developer            bool
-	NoAutoUpdate         bool
+	Developer              bool
+	NoAutoUpdate           bool
 	SystemEnvTakesPriority bool
 
 	// Network settings
-	CurlRetries     int
+	CurlRetries        int
 	CurlConnectTimeout int
-	CurlMaxTime     int
-	APIAllowlist    []string
-	APIBlocklist    []string
+	CurlMaxTime        int
+	APIAllowlist       []string
+	APIBlocklist       []string
 
 	// Analytics
-	NoAnalytics      bool
+	NoAnalytics       bool
 	NoGoogleAnalytics bool
 
 	// CI/Testing
-	CI              bool
+	CI                 bool
 	GithubHostedRunner bool
 }
 
@@ -61,11 +61,11 @@ type Config struct {
 func New() (*Config, error) {
 	cfg := &Config{
 		// Default values
-		AutoUpdate:          true,
-		InstallCleanup:      true,
-		CurlRetries:         3,
-		CurlConnectTimeout:  5,
-		CurlMaxTime:         0,
+		AutoUpdate:         true,
+		InstallCleanup:     true,
+		CurlRetries:        3,
+		CurlConnectTimeout: 5,
+		CurlMaxTime:        0,
 	}
 
 	// Set paths based on OS and architecture

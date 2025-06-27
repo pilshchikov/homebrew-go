@@ -85,7 +85,7 @@ func TestRunLinkWithArgs(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
-	defer os.RemoveAll(tempDir)
+	defer func() { _ = os.RemoveAll(tempDir) }()
 
 	cfg := &config.Config{
 		HomebrewCellar: filepath.Join(tempDir, "Cellar"),
@@ -94,20 +94,20 @@ func TestRunLinkWithArgs(t *testing.T) {
 
 	// Create cellar with installed formula
 	cellarDir := cfg.HomebrewCellar
-	os.MkdirAll(cellarDir, 0755)
+	_ = os.MkdirAll(cellarDir, 0755)
 
 	formulaDir := filepath.Join(cellarDir, "test-formula")
 	versionDir := filepath.Join(formulaDir, "1.0.0")
 	binDir := filepath.Join(versionDir, "bin")
-	os.MkdirAll(binDir, 0755)
+	_ = os.MkdirAll(binDir, 0755)
 
 	// Create executable in formula
 	execPath := filepath.Join(binDir, "test-exec")
-	os.WriteFile(execPath, []byte("#!/bin/bash\necho test"), 0755)
+	_ = os.WriteFile(execPath, []byte("#!/bin/bash\necho test"), 0755)
 
 	// Create prefix bin directory
 	prefixBinDir := filepath.Join(cfg.HomebrewPrefix, "bin")
-	os.MkdirAll(prefixBinDir, 0755)
+	_ = os.MkdirAll(prefixBinDir, 0755)
 
 	opts := &linkOptions{
 		overwrite: false,
@@ -129,7 +129,7 @@ func TestRunUnlinkWithArgs(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
-	defer os.RemoveAll(tempDir)
+	defer func() { _ = os.RemoveAll(tempDir) }()
 
 	cfg := &config.Config{
 		HomebrewCellar: filepath.Join(tempDir, "Cellar"),
@@ -137,21 +137,21 @@ func TestRunUnlinkWithArgs(t *testing.T) {
 	}
 
 	// Create cellar and prefix directories
-	os.MkdirAll(cfg.HomebrewCellar, 0755)
+	_ = os.MkdirAll(cfg.HomebrewCellar, 0755)
 	prefixBinDir := filepath.Join(cfg.HomebrewPrefix, "bin")
-	os.MkdirAll(prefixBinDir, 0755)
+	_ = os.MkdirAll(prefixBinDir, 0755)
 
 	// Create a symlink in prefix
 	formulaDir := filepath.Join(cfg.HomebrewCellar, "test-formula")
 	versionDir := filepath.Join(formulaDir, "1.0.0")
 	binDir := filepath.Join(versionDir, "bin")
-	os.MkdirAll(binDir, 0755)
+	_ = os.MkdirAll(binDir, 0755)
 
 	execPath := filepath.Join(binDir, "test-exec")
-	os.WriteFile(execPath, []byte("#!/bin/bash\necho test"), 0755)
+	_ = os.WriteFile(execPath, []byte("#!/bin/bash\necho test"), 0755)
 
 	linkPath := filepath.Join(prefixBinDir, "test-exec")
-	os.Symlink(execPath, linkPath)
+	_ = os.Symlink(execPath, linkPath)
 
 	opts := &unlinkOptions{
 		dryRun: false,
@@ -171,14 +171,14 @@ func TestRunLinkNotInstalled(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
-	defer os.RemoveAll(tempDir)
+	defer func() { _ = os.RemoveAll(tempDir) }()
 
 	cfg := &config.Config{
 		HomebrewCellar: filepath.Join(tempDir, "Cellar"),
 	}
 
 	// Create empty cellar
-	os.MkdirAll(cfg.HomebrewCellar, 0755)
+	_ = os.MkdirAll(cfg.HomebrewCellar, 0755)
 
 	opts := &linkOptions{}
 	err = runLink(cfg, []string{"non-existent-formula"}, opts)
@@ -195,7 +195,7 @@ func TestLinkFormula(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
-	defer os.RemoveAll(tempDir)
+	defer func() { _ = os.RemoveAll(tempDir) }()
 
 	cfg := &config.Config{
 		HomebrewCellar: filepath.Join(tempDir, "Cellar"),
@@ -206,15 +206,15 @@ func TestLinkFormula(t *testing.T) {
 	formulaDir := filepath.Join(cfg.HomebrewCellar, "test-formula")
 	versionDir := filepath.Join(formulaDir, "1.0.0")
 	binDir := filepath.Join(versionDir, "bin")
-	os.MkdirAll(binDir, 0755)
+	_ = os.MkdirAll(binDir, 0755)
 
 	// Create executable
 	execPath := filepath.Join(binDir, "test-exec")
-	os.WriteFile(execPath, []byte("#!/bin/bash\necho test"), 0755)
+	_ = os.WriteFile(execPath, []byte("#!/bin/bash\necho test"), 0755)
 
 	// Create prefix directories
 	prefixBinDir := filepath.Join(cfg.HomebrewPrefix, "bin")
-	os.MkdirAll(prefixBinDir, 0755)
+	_ = os.MkdirAll(prefixBinDir, 0755)
 
 	opts := &linkOptions{
 		overwrite: false,
@@ -236,7 +236,7 @@ func TestUnlinkFormulaLink(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
-	defer os.RemoveAll(tempDir)
+	defer func() { _ = os.RemoveAll(tempDir) }()
 
 	cfg := &config.Config{
 		HomebrewCellar: filepath.Join(tempDir, "Cellar"),
@@ -247,17 +247,17 @@ func TestUnlinkFormulaLink(t *testing.T) {
 	formulaDir := filepath.Join(cfg.HomebrewCellar, "test-formula")
 	versionDir := filepath.Join(formulaDir, "1.0.0")
 	binDir := filepath.Join(versionDir, "bin")
-	os.MkdirAll(binDir, 0755)
+	_ = os.MkdirAll(binDir, 0755)
 
 	prefixBinDir := filepath.Join(cfg.HomebrewPrefix, "bin")
-	os.MkdirAll(prefixBinDir, 0755)
+	_ = os.MkdirAll(prefixBinDir, 0755)
 
 	// Create executable and symlink
 	execPath := filepath.Join(binDir, "test-exec")
-	os.WriteFile(execPath, []byte("#!/bin/bash\necho test"), 0755)
+	_ = os.WriteFile(execPath, []byte("#!/bin/bash\necho test"), 0755)
 
 	linkPath := filepath.Join(prefixBinDir, "test-exec")
-	os.Symlink(execPath, linkPath)
+	_ = os.Symlink(execPath, linkPath)
 
 	opts := &unlinkOptions{
 		dryRun: false,
@@ -292,7 +292,7 @@ func TestIsFormulaInstalledSimple(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
-	defer os.RemoveAll(tempDir)
+	defer func() { _ = os.RemoveAll(tempDir) }()
 
 	cfg = &config.Config{
 		HomebrewCellar: tempDir,
@@ -301,7 +301,7 @@ func TestIsFormulaInstalledSimple(t *testing.T) {
 	// Create formula directory with version
 	formulaDir := filepath.Join(tempDir, "test-formula")
 	versionDir := filepath.Join(formulaDir, "1.0.0")
-	os.MkdirAll(versionDir, 0755)
+	_ = os.MkdirAll(versionDir, 0755)
 
 	installed = isFormulaInstalledSimple(cfg, "test-formula")
 	if !installed {
@@ -360,7 +360,7 @@ func TestLinkCommandExecution(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
-	defer os.RemoveAll(tempDir)
+	defer func() { _ = os.RemoveAll(tempDir) }()
 
 	cfg := &config.Config{
 		HomebrewCellar: filepath.Join(tempDir, "Cellar"),
@@ -370,7 +370,7 @@ func TestLinkCommandExecution(t *testing.T) {
 	// Create formula structure
 	formulaDir := filepath.Join(cfg.HomebrewCellar, "test-formula")
 	versionDir := filepath.Join(formulaDir, "1.0.0")
-	os.MkdirAll(versionDir, 0755)
+	_ = os.MkdirAll(versionDir, 0755)
 
 	// Test link command
 	linkCmd := NewLinkCmd(cfg)
@@ -395,7 +395,7 @@ func TestLinkDryRun(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
-	defer os.RemoveAll(tempDir)
+	defer func() { _ = os.RemoveAll(tempDir) }()
 
 	cfg := &config.Config{
 		HomebrewCellar: filepath.Join(tempDir, "Cellar"),
@@ -406,13 +406,13 @@ func TestLinkDryRun(t *testing.T) {
 	formulaDir := filepath.Join(cfg.HomebrewCellar, "test-formula")
 	versionDir := filepath.Join(formulaDir, "1.0.0")
 	binDir := filepath.Join(versionDir, "bin")
-	os.MkdirAll(binDir, 0755)
+	_ = os.MkdirAll(binDir, 0755)
 
 	execPath := filepath.Join(binDir, "test-exec")
-	os.WriteFile(execPath, []byte("#!/bin/bash\necho test"), 0755)
+	_ = os.WriteFile(execPath, []byte("#!/bin/bash\necho test"), 0755)
 
 	prefixBinDir := filepath.Join(cfg.HomebrewPrefix, "bin")
-	os.MkdirAll(prefixBinDir, 0755)
+	_ = os.MkdirAll(prefixBinDir, 0755)
 
 	opts := &linkOptions{
 		dryRun: true,
@@ -438,7 +438,7 @@ func TestUnlinkDryRun(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
-	defer os.RemoveAll(tempDir)
+	defer func() { _ = os.RemoveAll(tempDir) }()
 
 	cfg := &config.Config{
 		HomebrewCellar: filepath.Join(tempDir, "Cellar"),
@@ -449,16 +449,16 @@ func TestUnlinkDryRun(t *testing.T) {
 	formulaDir := filepath.Join(cfg.HomebrewCellar, "test-formula")
 	versionDir := filepath.Join(formulaDir, "1.0.0")
 	binDir := filepath.Join(versionDir, "bin")
-	os.MkdirAll(binDir, 0755)
+	_ = os.MkdirAll(binDir, 0755)
 
 	execPath := filepath.Join(binDir, "test-exec")
-	os.WriteFile(execPath, []byte("#!/bin/bash\necho test"), 0755)
+	_ = os.WriteFile(execPath, []byte("#!/bin/bash\necho test"), 0755)
 
 	prefixBinDir := filepath.Join(cfg.HomebrewPrefix, "bin")
-	os.MkdirAll(prefixBinDir, 0755)
+	_ = os.MkdirAll(prefixBinDir, 0755)
 
 	linkPath := filepath.Join(prefixBinDir, "test-exec")
-	os.Symlink(execPath, linkPath)
+	_ = os.Symlink(execPath, linkPath)
 
 	opts := &unlinkOptions{
 		dryRun: true,
@@ -483,7 +483,7 @@ func TestLinkMultipleFormulae(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
-	defer os.RemoveAll(tempDir)
+	defer func() { _ = os.RemoveAll(tempDir) }()
 
 	cfg := &config.Config{
 		HomebrewCellar: filepath.Join(tempDir, "Cellar"),
@@ -495,10 +495,10 @@ func TestLinkMultipleFormulae(t *testing.T) {
 	for _, formula := range formulae {
 		formulaDir := filepath.Join(cfg.HomebrewCellar, formula)
 		versionDir := filepath.Join(formulaDir, "1.0.0")
-		os.MkdirAll(versionDir, 0755)
+		_ = os.MkdirAll(versionDir, 0755)
 	}
 
-	os.MkdirAll(filepath.Join(cfg.HomebrewPrefix, "bin"), 0755)
+	_ = os.MkdirAll(filepath.Join(cfg.HomebrewPrefix, "bin"), 0755)
 
 	opts := &linkOptions{}
 	err = runLink(cfg, formulae, opts)

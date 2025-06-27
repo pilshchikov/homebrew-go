@@ -237,39 +237,39 @@ func TestNewChecksumError(t *testing.T) {
 
 func TestGetRecoveryOptions(t *testing.T) {
 	tests := []struct {
-		name        string
-		errorType   ErrorType
-		expectRetry bool
+		name         string
+		errorType    ErrorType
+		expectRetry  bool
 		expectIgnore bool
-		maxRetries  int
+		maxRetries   int
 	}{
 		{
-			name:        "network error",
-			errorType:   NetworkError,
-			expectRetry: true,
+			name:         "network error",
+			errorType:    NetworkError,
+			expectRetry:  true,
 			expectIgnore: false,
-			maxRetries:  3,
+			maxRetries:   3,
 		},
 		{
-			name:        "dependency error",
-			errorType:   DependencyError,
-			expectRetry: true,
+			name:         "dependency error",
+			errorType:    DependencyError,
+			expectRetry:  true,
 			expectIgnore: true,
-			maxRetries:  1,
+			maxRetries:   1,
 		},
 		{
-			name:        "build error",
-			errorType:   BuildError,
-			expectRetry: false,
+			name:         "build error",
+			errorType:    BuildError,
+			expectRetry:  false,
 			expectIgnore: false,
-			maxRetries:  0,
+			maxRetries:   0,
 		},
 		{
-			name:        "checksum error",
-			errorType:   ChecksumError,
-			expectRetry: true,
+			name:         "checksum error",
+			errorType:    ChecksumError,
+			expectRetry:  true,
 			expectIgnore: false,
-			maxRetries:  2,
+			maxRetries:   2,
 		},
 	}
 
@@ -295,11 +295,11 @@ func TestGetRecoveryOptions(t *testing.T) {
 
 func TestWrap(t *testing.T) {
 	tests := []struct {
-		name      string
-		err       error
-		operation string
-		formula   string
-		expectNil bool
+		name       string
+		err        error
+		operation  string
+		formula    string
+		expectNil  bool
 		expectType ErrorType
 	}{
 		{
@@ -425,24 +425,24 @@ func TestNewDownloadError(t *testing.T) {
 		expectedSuggs []string
 	}{
 		{
-			name:      "404 error",
-			operation: "download",
-			url:       "https://example.com/file.tar.gz",
-			cause:     fmt.Errorf("HTTP 404: Not Found"),
+			name:          "404 error",
+			operation:     "download",
+			url:           "https://example.com/file.tar.gz",
+			cause:         fmt.Errorf("HTTP 404: Not Found"),
 			expectedSuggs: []string{"moved or deleted"},
 		},
 		{
-			name:      "timeout error",
-			operation: "download",
-			url:       "https://example.com/file.tar.gz",
-			cause:     fmt.Errorf("context deadline exceeded"),
+			name:          "timeout error",
+			operation:     "download",
+			url:           "https://example.com/file.tar.gz",
+			cause:         fmt.Errorf("context deadline exceeded"),
 			expectedSuggs: []string{"slow", "try again later"},
 		},
 		{
-			name:      "generic error",
-			operation: "download",
-			url:       "https://example.com/file.tar.gz",
-			cause:     fmt.Errorf("connection refused"),
+			name:          "generic error",
+			operation:     "download",
+			url:           "https://example.com/file.tar.gz",
+			cause:         fmt.Errorf("connection refused"),
 			expectedSuggs: []string{"internet connection"},
 		},
 	}

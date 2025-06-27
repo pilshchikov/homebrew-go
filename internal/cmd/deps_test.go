@@ -69,7 +69,7 @@ func TestRunDepsTree(t *testing.T) {
 	err := runDeps(cfg, []string{"test-formula"}, opts)
 
 	// Restore stdout
-	w.Close()
+	_ = w.Close()
 	os.Stdout = oldStdout
 
 	if err != nil {
@@ -78,7 +78,7 @@ func TestRunDepsTree(t *testing.T) {
 
 	// Read captured output
 	var buf bytes.Buffer
-	buf.ReadFrom(r)
+	_, _ = buf.ReadFrom(r)
 	output := buf.String()
 
 	if output == "" {
@@ -135,7 +135,7 @@ func TestShowDepsTree(t *testing.T) {
 	err := showDepsTree(cfg, []string{"test-formula", "another-formula"}, opts)
 
 	// Restore stdout
-	w.Close()
+	_ = w.Close()
 	os.Stdout = oldStdout
 
 	if err != nil {
@@ -144,7 +144,7 @@ func TestShowDepsTree(t *testing.T) {
 
 	// Read captured output
 	var buf bytes.Buffer
-	buf.ReadFrom(r)
+	_, _ = buf.ReadFrom(r)
 	output := buf.String()
 
 	if output == "" {
@@ -200,7 +200,7 @@ func TestDepsWithTempDir(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
-	defer os.RemoveAll(tempDir)
+	defer func() { _ = os.RemoveAll(tempDir) }()
 
 	cfg := &config.Config{
 		HomebrewCellar: filepath.Join(tempDir, "Cellar"),
@@ -208,7 +208,7 @@ func TestDepsWithTempDir(t *testing.T) {
 	}
 
 	// Create cellar directory
-	os.MkdirAll(cfg.HomebrewCellar, 0755)
+	_ = os.MkdirAll(cfg.HomebrewCellar, 0755)
 
 	opts := &depsOptions{}
 	err = runDeps(cfg, []string{"test-formula"}, opts)

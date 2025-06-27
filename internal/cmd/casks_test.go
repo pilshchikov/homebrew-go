@@ -138,7 +138,7 @@ func TestRunCommands(t *testing.T) {
 	err := runCommands(cfg, opts)
 
 	// Restore stdout
-	w.Close()
+	_ = w.Close()
 	os.Stdout = oldStdout
 
 	if err != nil {
@@ -147,7 +147,7 @@ func TestRunCommands(t *testing.T) {
 
 	// Read captured output
 	var buf bytes.Buffer
-	buf.ReadFrom(r)
+	_, _ = buf.ReadFrom(r)
 	output := buf.String()
 
 	if !strings.Contains(output, "Built-in commands") {
@@ -173,7 +173,7 @@ func TestRunCommandsBuiltinOnly(t *testing.T) {
 	err := runCommands(cfg, opts)
 
 	// Restore stdout
-	w.Close()
+	_ = w.Close()
 	os.Stdout = oldStdout
 
 	if err != nil {
@@ -182,7 +182,7 @@ func TestRunCommandsBuiltinOnly(t *testing.T) {
 
 	// Read captured output
 	var buf bytes.Buffer
-	buf.ReadFrom(r)
+	_, _ = buf.ReadFrom(r)
 	output := buf.String()
 
 	if !strings.Contains(output, "Built-in commands") {
@@ -222,7 +222,7 @@ func TestRunCommandsQuiet(t *testing.T) {
 	err := runCommands(cfg, opts)
 
 	// Restore stdout
-	w.Close()
+	_ = w.Close()
 	os.Stdout = oldStdout
 
 	if err != nil {
@@ -231,7 +231,7 @@ func TestRunCommandsQuiet(t *testing.T) {
 
 	// Read captured output
 	var buf bytes.Buffer
-	buf.ReadFrom(r)
+	_, _ = buf.ReadFrom(r)
 	output := buf.String()
 
 	// In quiet mode, should not contain headers
@@ -282,7 +282,7 @@ func TestPrintCommands(t *testing.T) {
 	err := printCommands(commands, "Test Commands", false)
 
 	// Restore stdout
-	w.Close()
+	_ = w.Close()
 	os.Stdout = oldStdout
 
 	if err != nil {
@@ -291,7 +291,7 @@ func TestPrintCommands(t *testing.T) {
 
 	// Read captured output
 	var buf bytes.Buffer
-	buf.ReadFrom(r)
+	_, _ = buf.ReadFrom(r)
 	output := buf.String()
 
 	if !strings.Contains(output, "Test Commands:") {
@@ -317,7 +317,7 @@ func TestPrintCommandsQuiet(t *testing.T) {
 	err := printCommands(commands, "Test Commands", true)
 
 	// Restore stdout
-	w.Close()
+	_ = w.Close()
 	os.Stdout = oldStdout
 
 	if err != nil {
@@ -326,7 +326,7 @@ func TestPrintCommandsQuiet(t *testing.T) {
 
 	// Read captured output
 	var buf bytes.Buffer
-	buf.ReadFrom(r)
+	_, _ = buf.ReadFrom(r)
 	output := buf.String()
 
 	// Should not contain title in quiet mode
@@ -365,7 +365,7 @@ func TestOutputFormulaeJSON(t *testing.T) {
 	err := outputFormulaeJSON([]api.SearchResult{})
 
 	// Restore stdout
-	w.Close()
+	_ = w.Close()
 	os.Stdout = oldStdout
 
 	if err != nil {
@@ -374,7 +374,7 @@ func TestOutputFormulaeJSON(t *testing.T) {
 
 	// Read captured output
 	var buf bytes.Buffer
-	buf.ReadFrom(r)
+	_, _ = buf.ReadFrom(r)
 
 	// Should be valid JSON
 	var results []interface{}
@@ -396,12 +396,12 @@ func TestPrintColumnsCasks(t *testing.T) {
 	printColumns(items, 80)
 
 	// Restore stdout
-	w.Close()
+	_ = w.Close()
 	os.Stdout = oldStdout
 
 	// Read captured output
 	var buf bytes.Buffer
-	buf.ReadFrom(r)
+	_, _ = buf.ReadFrom(r)
 	output := buf.String()
 
 	// Should contain all items
@@ -423,12 +423,12 @@ func TestPrintColumnsEmpty(t *testing.T) {
 	printColumns([]string{}, 80)
 
 	// Restore stdout
-	w.Close()
+	_ = w.Close()
 	os.Stdout = oldStdout
 
 	// Read captured output
 	var buf bytes.Buffer
-	buf.ReadFrom(r)
+	_, _ = buf.ReadFrom(r)
 	output := buf.String()
 
 	// Should be empty

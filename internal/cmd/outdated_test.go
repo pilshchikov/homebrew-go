@@ -43,7 +43,7 @@ func TestRunOutdatedEmptyInstallation(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
-	defer os.RemoveAll(tempDir)
+	defer func() { _ = os.RemoveAll(tempDir) }()
 
 	cfg := &config.Config{
 		HomebrewCellar:  filepath.Join(tempDir, "Cellar"),
@@ -51,8 +51,8 @@ func TestRunOutdatedEmptyInstallation(t *testing.T) {
 	}
 
 	// Create empty cellar directory
-	os.MkdirAll(cfg.HomebrewCellar, 0755)
-	os.MkdirAll(cfg.HomebrewLibrary, 0755)
+	_ = os.MkdirAll(cfg.HomebrewCellar, 0755)
+	_ = os.MkdirAll(cfg.HomebrewLibrary, 0755)
 
 	opts := &outdatedOptions{
 		jsonOutput: false,
@@ -95,7 +95,7 @@ func TestGetOutdatedFormulae(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
-	defer os.RemoveAll(tempDir)
+	defer func() { _ = os.RemoveAll(tempDir) }()
 
 	cfg := &config.Config{
 		HomebrewCellar:  filepath.Join(tempDir, "Cellar"),
@@ -103,13 +103,13 @@ func TestGetOutdatedFormulae(t *testing.T) {
 	}
 
 	// Create cellar and library directories
-	os.MkdirAll(cfg.HomebrewCellar, 0755)
-	os.MkdirAll(cfg.HomebrewLibrary, 0755)
+	_ = os.MkdirAll(cfg.HomebrewCellar, 0755)
+	_ = os.MkdirAll(cfg.HomebrewLibrary, 0755)
 
 	// Create a test formula with installed version
 	formulaDir := filepath.Join(cfg.HomebrewCellar, "test-formula")
 	versionDir := filepath.Join(formulaDir, "1.0.0")
-	os.MkdirAll(versionDir, 0755)
+	_ = os.MkdirAll(versionDir, 0755)
 
 	opts := &outdatedOptions{
 		verbose: true,
@@ -168,7 +168,7 @@ func TestGetInstalledVersionsWithTemp(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
-	defer os.RemoveAll(tempDir)
+	defer func() { _ = os.RemoveAll(tempDir) }()
 
 	cfg := &config.Config{
 		HomebrewCellar: tempDir,
@@ -176,12 +176,12 @@ func TestGetInstalledVersionsWithTemp(t *testing.T) {
 
 	// Create formula with multiple versions
 	formulaDir := filepath.Join(tempDir, "test-formula")
-	os.MkdirAll(formulaDir, 0755)
+	_ = os.MkdirAll(formulaDir, 0755)
 
 	versions := []string{"1.0.0", "1.1.0", "2.0.0"}
 	for _, version := range versions {
 		versionDir := filepath.Join(formulaDir, version)
-		os.MkdirAll(versionDir, 0755)
+		_ = os.MkdirAll(versionDir, 0755)
 	}
 
 	installedVersions, err := getInstalledVersions(cfg, "test-formula")
@@ -238,7 +238,7 @@ func TestIsPinned(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
-	defer os.RemoveAll(tempDir)
+	defer func() { _ = os.RemoveAll(tempDir) }()
 
 	cfg := &config.Config{
 		HomebrewLibrary: tempDir,
@@ -251,10 +251,10 @@ func TestIsPinned(t *testing.T) {
 
 	// Create pinned formula
 	pinnedDir := filepath.Join(tempDir, "PinnedKegs")
-	os.MkdirAll(pinnedDir, 0755)
+	_ = os.MkdirAll(pinnedDir, 0755)
 
 	pinnedFile := filepath.Join(pinnedDir, "pinned-formula")
-	os.WriteFile(pinnedFile, []byte(""), 0644)
+	_ = os.WriteFile(pinnedFile, []byte(""), 0644)
 
 	if !isPinned(cfg, "pinned-formula") {
 		t.Error("Expected pinned formula to return true")
@@ -287,7 +287,7 @@ func TestOutputJSON(t *testing.T) {
 	err := outputJSON(outdatedItems)
 
 	// Restore stdout
-	w.Close()
+	_ = w.Close()
 	os.Stdout = oldStdout
 
 	if err != nil {
@@ -296,7 +296,7 @@ func TestOutputJSON(t *testing.T) {
 
 	// Read captured output
 	var buf bytes.Buffer
-	buf.ReadFrom(r)
+	_, _ = buf.ReadFrom(r)
 
 	// Parse JSON to verify structure
 	var jsonOutput []OutdatedInfo
@@ -346,7 +346,7 @@ func TestOutputText(t *testing.T) {
 	err := outputText(outdatedItems, opts)
 
 	// Restore stdout
-	w.Close()
+	_ = w.Close()
 	os.Stdout = oldStdout
 
 	if err != nil {
@@ -355,7 +355,7 @@ func TestOutputText(t *testing.T) {
 
 	// Read captured output
 	var buf bytes.Buffer
-	buf.ReadFrom(r)
+	_, _ = buf.ReadFrom(r)
 
 	// Should contain the outdated formula
 	if !strings.Contains(buf.String(), "test-formula") {
@@ -392,7 +392,7 @@ func TestOutputTextQuiet(t *testing.T) {
 	err := outputText(outdatedItems, opts)
 
 	// Restore stdout
-	w.Close()
+	_ = w.Close()
 	os.Stdout = oldStdout
 
 	if err != nil {
@@ -401,7 +401,7 @@ func TestOutputTextQuiet(t *testing.T) {
 
 	// Read captured output
 	var buf bytes.Buffer
-	buf.ReadFrom(r)
+	_, _ = buf.ReadFrom(r)
 	output := buf.String()
 
 	// Should contain only the formula name
@@ -435,7 +435,7 @@ func TestOutputTextVerbose(t *testing.T) {
 	err := outputText(outdatedItems, opts)
 
 	// Restore stdout
-	w.Close()
+	_ = w.Close()
 	os.Stdout = oldStdout
 
 	if err != nil {
@@ -444,7 +444,7 @@ func TestOutputTextVerbose(t *testing.T) {
 
 	// Read captured output
 	var buf bytes.Buffer
-	buf.ReadFrom(r)
+	_, _ = buf.ReadFrom(r)
 	output := buf.String()
 
 	// Should contain version information

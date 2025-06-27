@@ -8,31 +8,36 @@ import (
 	"time"
 )
 
+const (
+	platformDarwin = "darwin"
+	extensionDMG   = ".dmg"
+)
+
 // Cask represents a Homebrew cask for GUI applications
 type Cask struct {
-	Name         string            `json:"name"`
-	Token        string            `json:"token"`
-	FullName     string            `json:"full_name"`
-	Homepage     string            `json:"homepage"`
-	Description  string            `json:"desc"`
-	Version      string            `json:"version"`
-	URL          []CaskURL         `json:"url"`
-	Artifacts    []CaskArtifact    `json:"artifacts"`
-	Depends      []CaskDependency  `json:"depends_on"`
-	Conflicts    []CaskConflict    `json:"conflicts_with"`
-	AutoUpdates  bool              `json:"auto_updates"`
-	Container    *CaskContainer    `json:"container,omitempty"`
-	Caveats      string            `json:"caveats,omitempty"`
-	Languages    []string          `json:"languages,omitempty"`
-	Sha256       string            `json:"sha256"`
-	Appcast      *CaskAppcast      `json:"appcast,omitempty"`
-	Tags         []string          `json:"tags,omitempty"`
-	Deprecated   bool              `json:"deprecated"`
-	Disabled     bool              `json:"disabled"`
-	Ruby         string            `json:"ruby_source_path"`
-	TapGitHead   string            `json:"tap_git_head"`
-	InstallTime  *time.Time        `json:"installed,omitempty"`
-	InstalledBy  string            `json:"installed_by,omitempty"`
+	Name        string           `json:"name"`
+	Token       string           `json:"token"`
+	FullName    string           `json:"full_name"`
+	Homepage    string           `json:"homepage"`
+	Description string           `json:"desc"`
+	Version     string           `json:"version"`
+	URL         []CaskURL        `json:"url"`
+	Artifacts   []CaskArtifact   `json:"artifacts"`
+	Depends     []CaskDependency `json:"depends_on"`
+	Conflicts   []CaskConflict   `json:"conflicts_with"`
+	AutoUpdates bool             `json:"auto_updates"`
+	Container   *CaskContainer   `json:"container,omitempty"`
+	Caveats     string           `json:"caveats,omitempty"`
+	Languages   []string         `json:"languages,omitempty"`
+	Sha256      string           `json:"sha256"`
+	Appcast     *CaskAppcast     `json:"appcast,omitempty"`
+	Tags        []string         `json:"tags,omitempty"`
+	Deprecated  bool             `json:"deprecated"`
+	Disabled    bool             `json:"disabled"`
+	Ruby        string           `json:"ruby_source_path"`
+	TapGitHead  string           `json:"tap_git_head"`
+	InstallTime *time.Time       `json:"installed,omitempty"`
+	InstalledBy string           `json:"installed_by,omitempty"`
 }
 
 // CaskURL represents download URLs for different versions/platforms
@@ -82,10 +87,10 @@ type CaskBinary struct {
 
 // CaskInstaller represents a pkg installer
 type CaskInstaller struct {
-	Manual      string                 `json:"manual,omitempty"`
-	Script      map[string]interface{} `json:"script,omitempty"`
-	Allow       []string               `json:"allow_untrusted,omitempty"`
-	Choices     []CaskChoice           `json:"choices,omitempty"`
+	Manual  string                 `json:"manual,omitempty"`
+	Script  map[string]interface{} `json:"script,omitempty"`
+	Allow   []string               `json:"allow_untrusted,omitempty"`
+	Choices []CaskChoice           `json:"choices,omitempty"`
 }
 
 // CaskChoice represents installer choices
@@ -109,16 +114,16 @@ type CaskStageTarget struct {
 
 // CaskUninstall represents uninstall instructions
 type CaskUninstall struct {
-	Delete      []string                `json:"delete,omitempty"`
-	Trash       []string                `json:"trash,omitempty"`
-	Rmdir       []string                `json:"rmdir,omitempty"`
-	Script      map[string]interface{}  `json:"script,omitempty"`
-	Pkgutil     []string                `json:"pkgutil,omitempty"`
-	Signal      []CaskSignal            `json:"signal,omitempty"`
-	LoginItem   []string                `json:"login_item,omitempty"`
-	Quit        []string                `json:"quit,omitempty"`
-	Launchctl   []string                `json:"launchctl,omitempty"`
-	KillAll     []string                `json:"kext,omitempty"`
+	Delete    []string               `json:"delete,omitempty"`
+	Trash     []string               `json:"trash,omitempty"`
+	Rmdir     []string               `json:"rmdir,omitempty"`
+	Script    map[string]interface{} `json:"script,omitempty"`
+	Pkgutil   []string               `json:"pkgutil,omitempty"`
+	Signal    []CaskSignal           `json:"signal,omitempty"`
+	LoginItem []string               `json:"login_item,omitempty"`
+	Quit      []string               `json:"quit,omitempty"`
+	Launchctl []string               `json:"launchctl,omitempty"`
+	KillAll   []string               `json:"kext,omitempty"`
 }
 
 // CaskZap represents complete removal instructions
@@ -167,10 +172,10 @@ type CaskContainer struct {
 
 // CaskAppcast represents update checking information
 type CaskAppcast struct {
-	URL            string `json:"url"`
-	Checkpoint     string `json:"checkpoint,omitempty"`
-	MustContain    string `json:"must_contain,omitempty"`
-	Configuration  string `json:"configuration,omitempty"`
+	URL           string `json:"url"`
+	Checkpoint    string `json:"checkpoint,omitempty"`
+	MustContain   string `json:"must_contain,omitempty"`
+	Configuration string `json:"configuration,omitempty"`
 }
 
 // GetDownloadURL returns the primary download URL for the cask
@@ -223,7 +228,7 @@ func (c *Cask) IsCompatibleWithPlatform() bool {
 		if currentArch == "amd64" {
 			currentArch = "x86_64"
 		}
-		
+
 		compatible := false
 		for _, arch := range c.Depends[0].Arch {
 			if arch == currentArch {
@@ -235,9 +240,9 @@ func (c *Cask) IsCompatibleWithPlatform() bool {
 			return false
 		}
 	}
-	
+
 	// For now, assume macOS compatibility (casks are primarily for macOS)
-	return runtime.GOOS == "darwin"
+	return runtime.GOOS == platformDarwin
 }
 
 // GetInstallPath returns the installation path for the cask
@@ -255,38 +260,38 @@ func (c *Cask) NeedsSudo() bool {
 	if len(c.Artifacts) == 0 {
 		return false
 	}
-	
+
 	artifacts := c.Artifacts[0]
-	
+
 	// Check for system-level installations
 	if len(artifacts.Pkg) > 0 {
 		return true
 	}
-	
+
 	if len(artifacts.Installer) > 0 {
 		return true
 	}
-	
+
 	// Check for system directories
 	systemPaths := []string{
 		"/System/",
 		"/usr/",
 		"/Library/",
 	}
-	
+
 	for _, app := range artifacts.App {
 		target := app.Target
 		if target == "" {
 			target = c.GetApplicationPath()
 		}
-		
+
 		for _, sysPath := range systemPaths {
 			if strings.HasPrefix(target, sysPath) {
 				return true
 			}
 		}
 	}
-	
+
 	return false
 }
 
@@ -294,12 +299,12 @@ func (c *Cask) NeedsSudo() bool {
 func (c *Cask) GetFileExtension() string {
 	url := c.GetDownloadURL()
 	if url == "" {
-		return ".dmg" // Default for macOS
+		return extensionDMG // Default for macOS
 	}
-	
+
 	// Extract extension from URL
-	if strings.Contains(url, ".dmg") {
-		return ".dmg"
+	if strings.Contains(url, extensionDMG) {
+		return extensionDMG
 	} else if strings.Contains(url, ".pkg") {
 		return ".pkg"
 	} else if strings.Contains(url, ".zip") {
@@ -311,8 +316,8 @@ func (c *Cask) GetFileExtension() string {
 	} else if strings.Contains(url, ".tar.xz") {
 		return ".tar.xz"
 	}
-	
-	return ".dmg" // Default
+
+	return extensionDMG // Default
 }
 
 // GetCacheFileName returns the filename for caching downloads
@@ -334,16 +339,16 @@ func (c *Cask) RequiresManualInstallation() bool {
 	if len(c.Artifacts) == 0 {
 		return false
 	}
-	
+
 	artifacts := c.Artifacts[0]
-	
+
 	// Check for manual installer
 	for _, installer := range artifacts.Installer {
 		if installer.Manual != "" {
 			return true
 		}
 	}
-	
+
 	return false
 }
 
@@ -357,22 +362,22 @@ func (c *Cask) Validate() error {
 	if c.Token == "" {
 		return fmt.Errorf("cask token is required")
 	}
-	
+
 	if c.Version == "" {
 		return fmt.Errorf("cask version is required")
 	}
-	
+
 	if len(c.URL) == 0 || c.URL[0].URL == "" {
 		return fmt.Errorf("cask download URL is required")
 	}
-	
+
 	if c.Sha256 == "" {
 		return fmt.Errorf("cask SHA256 checksum is required")
 	}
-	
+
 	if len(c.Artifacts) == 0 {
 		return fmt.Errorf("cask must have at least one artifact")
 	}
-	
+
 	return nil
 }

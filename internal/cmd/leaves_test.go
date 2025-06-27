@@ -41,14 +41,14 @@ func TestRunLeavesNoFormulae(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
-	defer os.RemoveAll(tempDir)
+	defer func() { _ = os.RemoveAll(tempDir) }()
 
 	cfg := &config.Config{
 		HomebrewCellar: filepath.Join(tempDir, "Cellar"),
 	}
 
 	// Create empty cellar directory
-	os.MkdirAll(cfg.HomebrewCellar, 0755)
+	_ = os.MkdirAll(cfg.HomebrewCellar, 0755)
 
 	opts := &leavesOptions{
 		installedOnRequest: false,
@@ -69,7 +69,7 @@ func TestRunLeavesWithFormulae(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
-	defer os.RemoveAll(tempDir)
+	defer func() { _ = os.RemoveAll(tempDir) }()
 
 	cfg := &config.Config{
 		HomebrewCellar: filepath.Join(tempDir, "Cellar"),
@@ -77,14 +77,14 @@ func TestRunLeavesWithFormulae(t *testing.T) {
 
 	// Create cellar with some formulae
 	cellarDir := cfg.HomebrewCellar
-	os.MkdirAll(cellarDir, 0755)
+	_ = os.MkdirAll(cellarDir, 0755)
 
 	// Create formula directories with version subdirectories
 	formulae := []string{"formula1", "formula2", "formula3"}
 	for _, formula := range formulae {
 		formulaDir := filepath.Join(cellarDir, formula)
 		versionDir := filepath.Join(formulaDir, "1.0.0")
-		os.MkdirAll(versionDir, 0755)
+		_ = os.MkdirAll(versionDir, 0755)
 	}
 
 	// Capture stdout
@@ -100,7 +100,7 @@ func TestRunLeavesWithFormulae(t *testing.T) {
 	err = runLeaves(cfg, opts)
 
 	// Restore stdout
-	w.Close()
+	_ = w.Close()
 	os.Stdout = oldStdout
 
 	if err != nil {
@@ -109,7 +109,7 @@ func TestRunLeavesWithFormulae(t *testing.T) {
 
 	// Read captured output
 	var buf bytes.Buffer
-	buf.ReadFrom(r)
+	_, _ = buf.ReadFrom(r)
 
 	// Should contain the formulae names
 	for _, formula := range formulae {
@@ -145,7 +145,7 @@ func TestGetInstalledFormulaeWithTemp(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
-	defer os.RemoveAll(tempDir)
+	defer func() { _ = os.RemoveAll(tempDir) }()
 
 	cfg := &config.Config{
 		HomebrewCellar: tempDir,
@@ -156,12 +156,12 @@ func TestGetInstalledFormulaeWithTemp(t *testing.T) {
 	for _, formula := range testFormulae {
 		formulaDir := filepath.Join(tempDir, formula)
 		versionDir := filepath.Join(formulaDir, "1.0.0")
-		os.MkdirAll(versionDir, 0755)
+		_ = os.MkdirAll(versionDir, 0755)
 	}
 
 	// Create a directory without version subdirectories (should be ignored)
 	invalidDir := filepath.Join(tempDir, "invalid")
-	os.MkdirAll(invalidDir, 0755)
+	_ = os.MkdirAll(invalidDir, 0755)
 
 	formulae, err := getInstalledFormulae(cfg)
 	if err != nil {
@@ -280,7 +280,7 @@ func TestRunLeavesWithFilters(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
-	defer os.RemoveAll(tempDir)
+	defer func() { _ = os.RemoveAll(tempDir) }()
 
 	cfg := &config.Config{
 		HomebrewCellar: filepath.Join(tempDir, "Cellar"),
@@ -288,11 +288,11 @@ func TestRunLeavesWithFilters(t *testing.T) {
 
 	// Create cellar with formulae
 	cellarDir := cfg.HomebrewCellar
-	os.MkdirAll(cellarDir, 0755)
+	_ = os.MkdirAll(cellarDir, 0755)
 
 	formulaDir := filepath.Join(cellarDir, "test-formula")
 	versionDir := filepath.Join(formulaDir, "1.0.0")
-	os.MkdirAll(versionDir, 0755)
+	_ = os.MkdirAll(versionDir, 0755)
 
 	// Test with installedOnRequest filter
 	opts := &leavesOptions{

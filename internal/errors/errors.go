@@ -44,23 +44,23 @@ type BrewError struct {
 // Error implements the error interface
 func (e *BrewError) Error() string {
 	var parts []string
-	
+
 	if e.Operation != "" {
 		parts = append(parts, fmt.Sprintf("operation '%s' failed", e.Operation))
 	}
-	
+
 	if e.Formula != "" {
 		parts = append(parts, fmt.Sprintf("for formula '%s'", e.Formula))
 	}
-	
+
 	if e.Version != "" {
 		parts = append(parts, fmt.Sprintf("version '%s'", e.Version))
 	}
-	
+
 	if e.Cause != nil {
 		parts = append(parts, fmt.Sprintf("reason: %v", e.Cause))
 	}
-	
+
 	return strings.Join(parts, " ")
 }
 
@@ -84,11 +84,11 @@ func NewNetworkError(operation, url string, cause error) *BrewError {
 		"Verify that the URL is accessible",
 		"Try again in a few minutes",
 	}
-	
+
 	if strings.Contains(url, "github.com") {
 		suggestions = append(suggestions, "Check GitHub's status at https://status.github.com")
 	}
-	
+
 	return &BrewError{
 		Type:        NetworkError,
 		Operation:   operation,
@@ -105,7 +105,7 @@ func NewDependencyError(formula, dependency string, cause error) *BrewError {
 		"Check if the dependency name is correct",
 		"Use --ignore-dependencies to skip dependency checks",
 	}
-	
+
 	return &BrewError{
 		Type:        DependencyError,
 		Operation:   "dependency resolution",
@@ -124,7 +124,7 @@ func NewBuildError(formula, version string, cause error) *BrewError {
 		"Look for error messages in the build output above",
 		"Search for known issues with this formula",
 	}
-	
+
 	return &BrewError{
 		Type:        BuildError,
 		Operation:   "build",
@@ -143,7 +143,7 @@ func NewPermissionError(operation, path string, cause error) *BrewError {
 		"Ensure you have write access to the installation directory",
 		"Try running with appropriate permissions",
 	}
-	
+
 	return &BrewError{
 		Type:        PermissionError,
 		Operation:   operation,
@@ -161,7 +161,7 @@ func NewFormulaNotFoundError(formula string) *BrewError {
 		"Try updating your tap list with 'brew update'",
 		"Check if the formula is in a tap that needs to be added",
 	}
-	
+
 	return &BrewError{
 		Type:        FormulaNotFoundError,
 		Operation:   "formula lookup",
@@ -178,15 +178,15 @@ func NewDownloadError(operation, url string, cause error) *BrewError {
 		"Verify the download URL is correct",
 		"Try downloading manually to test connectivity",
 	}
-	
+
 	if strings.Contains(cause.Error(), "404") {
 		suggestions = append(suggestions, "The file may have been moved or deleted")
 	}
-	
+
 	if strings.Contains(cause.Error(), "timeout") || strings.Contains(cause.Error(), "deadline exceeded") {
 		suggestions = append(suggestions, "The server may be slow, try again later")
 	}
-	
+
 	return &BrewError{
 		Type:        DownloadError,
 		Operation:   operation,
@@ -199,14 +199,14 @@ func NewDownloadError(operation, url string, cause error) *BrewError {
 // NewChecksumError creates a checksum verification error
 func NewChecksumError(formula, version string, expected, actual string) *BrewError {
 	cause := fmt.Errorf("checksum mismatch: expected %s, got %s", expected, actual)
-	
+
 	suggestions := []string{
 		"The download may be corrupted, try downloading again",
 		"Clear your cache and retry the installation",
 		"Check if there's a newer version of the formula available",
 		"Report this issue if it persists",
 	}
-	
+
 	return &BrewError{
 		Type:        ChecksumError,
 		Operation:   "checksum verification",
@@ -225,7 +225,7 @@ func NewConfigurationError(operation string, cause error) *BrewError {
 		"Verify environment variables are set correctly",
 		"Try running 'brew doctor' to diagnose issues",
 	}
-	
+
 	return &BrewError{
 		Type:        ConfigurationError,
 		Operation:   operation,
@@ -243,7 +243,7 @@ func NewInstallationError(formula, version string, cause error) *BrewError {
 		"Search for known issues with this formula",
 		"Consider using an alternative formula if available",
 	}
-	
+
 	return &BrewError{
 		Type:        InstallationError,
 		Operation:   "installation",
@@ -304,7 +304,7 @@ func Wrap(err error, operation, formula string) error {
 	if err == nil {
 		return nil
 	}
-	
+
 	if brewErr, ok := err.(*BrewError); ok {
 		// Update existing BrewError with additional context
 		brewErr.Operation = operation
@@ -313,7 +313,7 @@ func Wrap(err error, operation, formula string) error {
 		}
 		return brewErr
 	}
-	
+
 	// Create new BrewError from generic error
 	return &BrewError{
 		Type:      InstallationError,

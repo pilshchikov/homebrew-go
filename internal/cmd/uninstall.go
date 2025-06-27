@@ -204,7 +204,7 @@ func unlinkFormulaUninstall(cfg *config.Config, formulaName string) error {
 			target, err := os.Readlink(linkPath)
 			if err == nil && strings.HasPrefix(target, formulaPrefix) {
 				logger.Debug("Removing symlink: %s -> %s", linkPath, target)
-				os.Remove(linkPath)
+				_ = os.Remove(linkPath)
 			}
 		}
 	}

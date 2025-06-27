@@ -46,7 +46,7 @@ func TestNewClient(t *testing.T) {
 		t.Error("User agent not set")
 	}
 
-	expectedUserAgent := fmt.Sprintf("Homebrew-Go/3.0.0 (%s; %s) Go/%s", 
+	expectedUserAgent := fmt.Sprintf("Homebrew-Go/3.0.0 (%s; %s) Go/%s",
 		runtime.GOOS, runtime.GOARCH, "1.20")
 	if client.userAgent != expectedUserAgent {
 		t.Errorf("Expected user agent %s, got %s", expectedUserAgent, client.userAgent)
@@ -54,8 +54,8 @@ func TestNewClient(t *testing.T) {
 }
 
 func TestNewClientWithCustomDomain(t *testing.T) {
-	os.Setenv("HOMEBREW_API_DOMAIN", "https://custom.api.domain")
-	defer os.Unsetenv("HOMEBREW_API_DOMAIN")
+	_ = os.Setenv("HOMEBREW_API_DOMAIN", "https://custom.api.domain")
+	defer func() { _ = os.Unsetenv("HOMEBREW_API_DOMAIN") }()
 
 	cfg := &config.Config{}
 	client := NewClient(cfg)
@@ -71,11 +71,11 @@ func TestGetFormula(t *testing.T) {
 		if r.URL.Path == "/formula/wget.json" {
 			w.Header().Set("Content-Type", "application/json")
 			response := FormulaAPIResponse{
-				Name:        "wget",
-				FullName:    "wget",
-				Desc:        "Internet file retriever",
-				Homepage:    "https://www.gnu.org/software/wget/",
-				License:     "GPL-3.0",
+				Name:         "wget",
+				FullName:     "wget",
+				Desc:         "Internet file retriever",
+				Homepage:     "https://www.gnu.org/software/wget/",
+				License:      "GPL-3.0",
 				Dependencies: []string{"openssl@1.1"},
 				Versions: map[string]interface{}{
 					"stable": "1.21.3",
@@ -97,7 +97,7 @@ func TestGetFormula(t *testing.T) {
 					},
 				},
 			}
-			json.NewEncoder(w).Encode(response)
+			_ = json.NewEncoder(w).Encode(response)
 		} else {
 			http.NotFound(w, r)
 		}
@@ -204,11 +204,11 @@ func TestSearchFormulae(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
-	defer os.RemoveAll(tempDir)
+	defer func() { _ = os.RemoveAll(tempDir) }()
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		
+
 		if r.URL.Path == "/formula.json" {
 			// Return list of formulae
 			formulae := []map[string]interface{}{
@@ -216,20 +216,20 @@ func TestSearchFormulae(t *testing.T) {
 				{"name": "curl"},
 				{"name": "git"},
 			}
-			json.NewEncoder(w).Encode(formulae)
+			_ = json.NewEncoder(w).Encode(formulae)
 		} else if strings.HasPrefix(r.URL.Path, "/formula/") {
 			// Return specific formula details
 			name := strings.TrimSuffix(strings.TrimPrefix(r.URL.Path, "/formula/"), ".json")
 			response := FormulaAPIResponse{
-				Name:        name,
-				FullName:    name,
-				Desc:        fmt.Sprintf("Description for %s", name),
-				Homepage:    fmt.Sprintf("https://example.com/%s", name),
+				Name:     name,
+				FullName: name,
+				Desc:     fmt.Sprintf("Description for %s", name),
+				Homepage: fmt.Sprintf("https://example.com/%s", name),
 				Versions: map[string]interface{}{
 					"stable": "1.0.0",
 				},
 			}
-			json.NewEncoder(w).Encode(response)
+			_ = json.NewEncoder(w).Encode(response)
 		} else {
 			http.NotFound(w, r)
 		}
@@ -310,7 +310,7 @@ func TestIsCacheValid(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
-	defer os.RemoveAll(tempDir)
+	defer func() { _ = os.RemoveAll(tempDir) }()
 
 	cfg := &config.Config{}
 	client := NewClient(cfg)
@@ -323,7 +323,7 @@ func TestIsCacheValid(t *testing.T) {
 
 	// Test recent file
 	recentFile := filepath.Join(tempDir, "recent.txt")
-	if err := os.WriteFile(recentFile, []byte("test"), 0644); err != nil {
+	if err := os.WriteFile(recentFile, []byte("test"), 0600); err != nil {
 		t.Fatalf("Failed to create recent file: %v", err)
 	}
 
@@ -347,15 +347,15 @@ func TestReadCachedNames(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
-	defer os.RemoveAll(tempDir)
+	defer func() { _ = os.RemoveAll(tempDir) }()
 
 	cfg := &config.Config{}
 	client := NewClient(cfg)
 
 	cacheFile := filepath.Join(tempDir, "test.txt")
 	content := "wget\ncurl\ngit\n"
-	
-	if err := os.WriteFile(cacheFile, []byte(content), 0644); err != nil {
+
+	if err := os.WriteFile(cacheFile, []byte(content), 0600); err != nil {
 		t.Fatalf("Failed to write cache file: %v", err)
 	}
 
@@ -381,7 +381,7 @@ func TestCacheNames(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
-	defer os.RemoveAll(tempDir)
+	defer func() { _ = os.RemoveAll(tempDir) }()
 
 	cfg := &config.Config{}
 	client := NewClient(cfg)
@@ -413,7 +413,7 @@ func TestIsFileValid(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
-	defer os.RemoveAll(tempDir)
+	defer func() { _ = os.RemoveAll(tempDir) }()
 
 	cfg := &config.Config{}
 	client := NewClient(cfg)
@@ -426,7 +426,7 @@ func TestIsFileValid(t *testing.T) {
 
 	// Test file with no checksum requirement
 	testFile := filepath.Join(tempDir, "test.txt")
-	if err := os.WriteFile(testFile, []byte("test content"), 0644); err != nil {
+	if err := os.WriteFile(testFile, []byte("test content"), 0600); err != nil {
 		t.Fatalf("Failed to create test file: %v", err)
 	}
 
@@ -446,7 +446,7 @@ func TestDownloadBottle(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
-	defer os.RemoveAll(tempDir)
+	defer func() { _ = os.RemoveAll(tempDir) }()
 
 	// Test formula without bottle
 	testFormula := &formula.Formula{
@@ -472,7 +472,7 @@ func TestDownloadBottle(t *testing.T) {
 			Files: make(map[string]formula.BottleFile),
 		},
 	}
-	
+
 	// Add a bottle file for monterey
 	testFormula.Bottle.Stable.Files["monterey"] = formula.BottleFile{
 		URL:    "https://example.com/test.tar.gz",
@@ -491,13 +491,13 @@ func TestDownloadBottle(t *testing.T) {
 
 func TestAddGHCRAuth(t *testing.T) {
 	// Test with GitHub token from environment
-	os.Setenv("GITHUB_TOKEN", "test-token")
-	defer os.Unsetenv("GITHUB_TOKEN")
+	_ = os.Setenv("GITHUB_TOKEN", "test-token")
+	defer func() { _ = os.Unsetenv("GITHUB_TOKEN") }()
 
 	cfg := &config.Config{}
 	client := NewClient(cfg)
 
-	req, err := http.NewRequest("GET", "https://ghcr.io/test", nil)
+	req, err := http.NewRequest("GET", "https://ghcr.io/test", http.NoBody)
 	if err != nil {
 		t.Fatalf("Failed to create request: %v", err)
 	}
@@ -517,14 +517,14 @@ func TestDownloadWithRetry(t *testing.T) {
 	// Test successful download
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("test content"))
+		_, _ = w.Write([]byte("test content"))
 	}))
 	defer server.Close()
 
 	cfg := &config.Config{}
 	client := NewClient(cfg)
 
-	req, err := http.NewRequest("GET", server.URL, nil)
+	req, err := http.NewRequest("GET", server.URL, http.NoBody)
 	if err != nil {
 		t.Fatalf("Failed to create request: %v", err)
 	}
@@ -533,7 +533,7 @@ func TestDownloadWithRetry(t *testing.T) {
 	if err != nil {
 		t.Fatalf("downloadWithRetry failed: %v", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusOK {
 		t.Errorf("Expected status 200, got %d", resp.StatusCode)
@@ -554,14 +554,14 @@ func TestParseCaskFromAPI(t *testing.T) {
 	client := NewClient(cfg)
 
 	apiData := map[string]interface{}{
-		"token":      "test-cask",
-		"name":       "Test Cask",
-		"full_name":  "test-cask",
-		"homepage":   "https://example.com",
-		"desc":       "A test cask",
-		"version":    "1.0.0",
-		"sha256":     "abc123",
-		"url":        "https://example.com/test.dmg",
+		"token":     "test-cask",
+		"name":      "Test Cask",
+		"full_name": "test-cask",
+		"homepage":  "https://example.com",
+		"desc":      "A test cask",
+		"version":   "1.0.0",
+		"sha256":    "abc123",
+		"url":       "https://example.com/test.dmg",
 		"artifacts": []interface{}{
 			map[string]interface{}{
 				"app": []interface{}{"Test.app"},
@@ -624,14 +624,14 @@ func TestGetCask(t *testing.T) {
 		if r.URL.Path == "/cask/firefox.json" {
 			w.Header().Set("Content-Type", "application/json")
 			response := map[string]interface{}{
-				"token":      "firefox",
-				"name":       "Firefox",
-				"full_name":  "firefox",
-				"homepage":   "https://www.mozilla.org/firefox/",
-				"desc":       "Web browser",
-				"version":    "120.0",
-				"sha256":     "abc123def456",
-				"url":        "https://download.mozilla.org/firefox.dmg",
+				"token":     "firefox",
+				"name":      "Firefox",
+				"full_name": "firefox",
+				"homepage":  "https://www.mozilla.org/firefox/",
+				"desc":      "Web browser",
+				"version":   "120.0",
+				"sha256":    "abc123def456",
+				"url":       "https://download.mozilla.org/firefox.dmg",
 				"artifacts": []interface{}{
 					map[string]interface{}{
 						"app": []interface{}{"Firefox.app"},
@@ -644,7 +644,7 @@ func TestGetCask(t *testing.T) {
 					"arch": []interface{}{"x86_64", "arm64"},
 				},
 			}
-			json.NewEncoder(w).Encode(response)
+			_ = json.NewEncoder(w).Encode(response)
 		} else if r.URL.Path == "/cask/notfound.json" {
 			http.NotFound(w, r)
 		} else {
@@ -755,7 +755,7 @@ func TestSearchCasks(t *testing.T) {
 					"desc":  "Container platform",
 				},
 			}
-			json.NewEncoder(w).Encode(caskList)
+			_ = json.NewEncoder(w).Encode(caskList)
 		} else {
 			http.Error(w, "Not Found", http.StatusNotFound)
 		}
@@ -851,12 +851,12 @@ func TestSearchCasksAPIError(t *testing.T) {
 func TestDownloadBottleEnhanced(t *testing.T) {
 	// Initialize logger for tests
 	logger.Init(false, false, true)
-	
+
 	tempDir, err := os.MkdirTemp("", "test-cache")
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
-	defer os.RemoveAll(tempDir)
+	defer func() { _ = os.RemoveAll(tempDir) }()
 
 	cfg := &config.Config{
 		HomebrewCache: tempDir,
@@ -873,7 +873,7 @@ func TestDownloadBottleEnhanced(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/gzip")
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(testContent))
+		_, _ = w.Write([]byte(testContent))
 	}))
 	defer server.Close()
 

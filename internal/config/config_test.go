@@ -17,16 +17,16 @@ func TestNew(t *testing.T) {
 		if val := os.Getenv(env); val != "" {
 			originalEnv[env] = val
 		}
-		os.Unsetenv(env)
+		_ = os.Unsetenv(env)
 	}
 
 	// Restore environment after test
 	defer func() {
 		for _, env := range envVars {
-			os.Unsetenv(env)
+			_ = os.Unsetenv(env)
 		}
 		for env, val := range originalEnv {
-			os.Setenv(env, val)
+			_ = os.Setenv(env, val)
 		}
 	}()
 
@@ -61,10 +61,10 @@ func TestNew(t *testing.T) {
 func TestEnvironmentOverrides(t *testing.T) {
 	// Set test environment variables
 	testEnv := map[string]string{
-		"HOMEBREW_PREFIX":     "/test/prefix",
-		"HOMEBREW_DEBUG":      "1",
-		"HOMEBREW_VERBOSE":    "true",
-		"HOMEBREW_QUIET":      "false",
+		"HOMEBREW_PREFIX":      "/test/prefix",
+		"HOMEBREW_DEBUG":       "1",
+		"HOMEBREW_VERBOSE":     "true",
+		"HOMEBREW_QUIET":       "false",
 		"HOMEBREW_AUTO_UPDATE": "0",
 	}
 
@@ -74,16 +74,16 @@ func TestEnvironmentOverrides(t *testing.T) {
 		if original := os.Getenv(key); original != "" {
 			originalEnv[key] = original
 		}
-		os.Setenv(key, val)
+		_ = os.Setenv(key, val)
 	}
 
 	// Restore environment after test
 	defer func() {
 		for key := range testEnv {
-			os.Unsetenv(key)
+			_ = os.Unsetenv(key)
 		}
 		for key, val := range originalEnv {
-			os.Setenv(key, val)
+			_ = os.Setenv(key, val)
 		}
 	}()
 
@@ -133,11 +133,11 @@ func TestGetBoolEnv(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			key := "TEST_BOOL_ENV"
 			if tt.envValue != "" {
-				os.Setenv(key, tt.envValue)
+				_ = os.Setenv(key, tt.envValue)
 			} else {
-				os.Unsetenv(key)
+				_ = os.Unsetenv(key)
 			}
-			defer os.Unsetenv(key)
+			defer func() { _ = os.Unsetenv(key) }()
 
 			result := getBoolEnv(key, tt.defaultValue)
 			if result != tt.expected {
@@ -164,11 +164,11 @@ func TestGetIntEnv(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			key := "TEST_INT_ENV"
 			if tt.envValue != "" {
-				os.Setenv(key, tt.envValue)
+				_ = os.Setenv(key, tt.envValue)
 			} else {
-				os.Unsetenv(key)
+				_ = os.Unsetenv(key)
 			}
-			defer os.Unsetenv(key)
+			defer func() { _ = os.Unsetenv(key) }()
 
 			result := getIntEnv(key, tt.defaultValue)
 			if result != tt.expected {

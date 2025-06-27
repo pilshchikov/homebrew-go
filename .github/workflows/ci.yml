@@ -193,7 +193,7 @@ jobs:
     - name: Install Security Tools
       run: |
         go install github.com/securego/gosec/v2/cmd/gosec@latest
-        go install github.com/sonatypecommunity/nancy@latest
+        go install golang.org/x/vuln/cmd/govulncheck@latest
 
     - name: Run Gosec Security Scanner
       run: |
@@ -202,11 +202,11 @@ jobs:
         echo "✅ Gosec scan completed"
       continue-on-error: true
 
-    - name: Run Nancy Vulnerability Scanner
+    - name: Run Go Vulnerability Scanner
       run: |
-        echo "🔍 Running Nancy vulnerability scanner..."
-        go list -json -deps ./... | nancy sleuth || echo "⚠️  Nancy found potential vulnerabilities (non-blocking)"
-        echo "✅ Nancy scan completed"
+        echo "🔍 Running govulncheck vulnerability scanner..."
+        govulncheck ./... || echo "⚠️  Govulncheck found potential vulnerabilities (non-blocking)"
+        echo "✅ Govulncheck scan completed"
       continue-on-error: true
 
     - name: Security Scan Summary
@@ -214,6 +214,7 @@ jobs:
         echo "🛡️  Security scans completed successfully"
         echo "ℹ️   Check the logs above for any security findings"
         echo "ℹ️   Security scans are non-blocking and for informational purposes"
+        echo "ℹ️   Using gosec for code security and govulncheck for vulnerability scanning"
 
   # Summary job for status checks
   ci-success:

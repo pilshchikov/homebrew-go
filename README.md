@@ -15,12 +15,12 @@ This project was created by **Stepan Pilshchikov** ([GitHub](https://github.com/
 
 ## Features
 
-✅ **Complete Go Implementation** - Fully rewritten from Ruby to Go
-✅ **API Compatibility** - Works with all original Homebrew APIs and endpoints
-✅ **All Commands** - Support for install, uninstall, update, upgrade, search, info, and more
-✅ **Formulae & Casks** - Full support for both formulae and cask installations
-✅ **Tap System** - Compatible with existing Homebrew taps
-✅ **Cross-Platform** - Supports macOS and Linux
+✅ **Complete Go Implementation** - Fully rewritten from Ruby to Go  
+✅ **API Compatibility** - Works with all original Homebrew APIs and endpoints  
+✅ **All Commands** - Support for install, uninstall, update, upgrade, search, info, and more  
+✅ **Formulae & Casks** - Full support for both formulae and cask installations  
+✅ **Tap System** - Compatible with existing Homebrew taps  
+✅ **Cross-Platform** - Supports macOS and Linux  
 ✅ **Performance** - Enhanced performance through Go's concurrency and efficiency  
 
 ## Installation

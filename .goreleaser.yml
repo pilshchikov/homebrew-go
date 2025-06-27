@@ -47,8 +47,8 @@ archives:
         formats: [zip]
     files:
       - README.md
-      - LICENSE.txt
-      - docs/**/*
+      - LICENSE*
+      - install.sh
 
 checksum:
   name_template: 'checksums.txt'
@@ -104,38 +104,36 @@ release:
     This is an automated release of Homebrew Go.
 
   footer: |
-    ## 📦 Installation
+    ## 📦 Installation Options
 
-    ### Download Binary Directly
+    ### Quick Install (Default: `brew-go`)
     ```bash
-    # macOS (Intel)
-    curl -L https://github.com/pilshchikov/homebrew-go/releases/download/{{ .Tag }}/homebrew-go_Darwin_x86_64.tar.gz | tar xz
-    
-    # macOS (Apple Silicon)
-    curl -L https://github.com/pilshchikov/homebrew-go/releases/download/{{ .Tag }}/homebrew-go_Darwin_arm64.tar.gz | tar xz
-    
-    # Linux (x86_64)
-    curl -L https://github.com/pilshchikov/homebrew-go/releases/download/{{ .Tag }}/homebrew-go_Linux_x86_64.tar.gz | tar xz
+    curl -sSL https://github.com/pilshchikov/homebrew-go/releases/download/{{ .Tag }}/install.sh | bash
     ```
 
-    ### Install via Package Manager
+    ### Custom Binary Name
     ```bash
-    # Install from source with Go
-    go install github.com/pilshchikov/homebrew-go/cmd/brew@{{ .Tag }}
+    # Install as 'hbrew'
+    curl -sSL https://github.com/pilshchikov/homebrew-go/releases/download/{{ .Tag }}/install.sh | bash -s -- --name hbrew
+    
+    # Install as 'brew' (may conflict with original Homebrew)
+    curl -sSL https://github.com/pilshchikov/homebrew-go/releases/download/{{ .Tag }}/install.sh | bash -s -- --name brew
+    
+    # Install to system directory
+    curl -sSL https://github.com/pilshchikov/homebrew-go/releases/download/{{ .Tag }}/install.sh | bash -s -- --name brew --dir /usr/local/bin
     ```
 
-    ## ✨ Automatic Build System
-
-    This release was automatically generated with semantic version `{{ .Tag }}`.
+    ### Download & Run (No Installation)
+    ```bash
+    # macOS Intel
+    curl -L https://github.com/pilshchikov/homebrew-go/releases/download/{{ .Tag }}/homebrew-go_Darwin_x86_64.tar.gz | tar xz && ./brew --version
     
-    **Build Details:**
-    - **Date:** {{ .Date | date "2006-01-02" }}
-    - **Commit:** {{ .ShortCommit }}
-    - **Build Number:** {{ .Env.GITHUB_RUN_NUMBER }}
+    # macOS Apple Silicon  
+    curl -L https://github.com/pilshchikov/homebrew-go/releases/download/{{ .Tag }}/homebrew-go_Darwin_arm64.tar.gz | tar xz && ./brew --version
+    ```
 
-  extra_files:
-    - glob: ./docs/**/*
-    - glob: ./scripts/**/*
+    **Built:** {{ .Date | date "2006-01-02" }} | {{ .ShortCommit }}
+
 
 milestones:
   - close: true

@@ -9,19 +9,19 @@ A complete rewrite of the [Homebrew](https://brew.sh) package manager from Ruby 
 
 ## About This Project
 
-This project was created by **Stepan Pilshchikov** ([GitHub](https://github.com/pilshchikov)) as a fun side project to explore the capabilities of Claude Code and demonstrate a complete language migration of a complex system. 
+This project was created by **Stepan Pilshchikov** ([GitHub](https://github.com/pilshchikov)) as a fun side project to explore the capabilities of Claude Code and demonstrate a complete language migration of a complex system.
 
 **Important Disclaimer:** This is an independent project and is not affiliated with the official Homebrew project. It does not pretend to replace or compete with the original Homebrew. This is purely an educational and experimental endeavor.
 
 ## Features
 
-✅ **Complete Go Implementation** - Fully rewritten from Ruby to Go  
-✅ **API Compatibility** - Works with all original Homebrew APIs and endpoints  
-✅ **All Commands** - Support for install, uninstall, update, upgrade, search, info, and more  
-✅ **Formulae & Casks** - Full support for both formulae and cask installations  
-✅ **Tap System** - Compatible with existing Homebrew taps  
-✅ **Cross-Platform** - Supports macOS and Linux  
-✅ **Performance** - Enhanced performance through Go's concurrency and efficiency  
+✅ **Complete Go Implementation** - Fully rewritten from Ruby to Go
+✅ **API Compatibility** - Works with all original Homebrew APIs and endpoints
+✅ **All Commands** - Support for install, uninstall, update, upgrade, search, info, and more
+✅ **Formulae & Casks** - Full support for both formulae and cask installations
+✅ **Tap System** - Compatible with existing Homebrew taps
+✅ **Cross-Platform** - Supports macOS and Linux
+✅ **Performance** - Enhanced performance through Go's concurrency and efficiency
 
 ## Installation
 
@@ -124,7 +124,7 @@ brew doctor
 This Go implementation maintains the same architecture concepts as the original Homebrew:
 
 - **Formulae** - Package definitions for command-line tools
-- **Casks** - Package definitions for GUI applications  
+- **Casks** - Package definitions for GUI applications
 - **Taps** - Third-party repositories of formulae and casks
 - **Cellar** - Installation directory for packages
 - **API** - RESTful API for package metadata
@@ -159,7 +159,7 @@ export HOMEBREW_GITHUB_API_TOKEN="your_token_here"
 - **macOS** - Supports Apple Silicon (M1/M2) and Intel processors
 - **Linux** - Full Linux support with package management
 - **Formulae** - Compatible with existing Homebrew formulae
-- **Casks** - Works with existing Homebrew casks  
+- **Casks** - Works with existing Homebrew casks
 - **Taps** - Can use existing third-party taps
 
 ## Contributing
@@ -185,4 +185,3 @@ This project is licensed under the same BSD 2-Clause License as the original Hom
 For questions, issues, or contributions, please visit our [GitHub repository](https://github.com/pilshchikov/homebrew-go).
 
 **Note:** This is an independent project. For official Homebrew support, please visit [brew.sh](https://brew.sh).
-# homebrew-go

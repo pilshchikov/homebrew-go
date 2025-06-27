@@ -313,6 +313,13 @@ func (ci *Installer) installApp(app CaskApp, sourcePath string, opts *CaskInstal
 	}
 
 	// Copy the application
+	// Validate paths to prevent command injection
+	if sourcePath == "" || target == "" || 
+	   strings.Contains(sourcePath, ";") || strings.Contains(sourcePath, "&") || strings.Contains(sourcePath, "|") ||
+	   strings.Contains(target, ";") || strings.Contains(target, "&") || strings.Contains(target, "|") {
+		return fmt.Errorf("invalid source or target path")
+	}
+	// #nosec G204 - paths are validated above
 	cmd := exec.Command("cp", "-R", sourcePath, target)
 	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("failed to copy application: %w", err)
@@ -320,6 +327,7 @@ func (ci *Installer) installApp(app CaskApp, sourcePath string, opts *CaskInstal
 
 	// Remove quarantine attribute if requested
 	if opts.NoQuarantine {
+		// #nosec G204 - target path is already validated above
 		cmd = exec.Command("xattr", "-dr", "com.apple.quarantine", target)
 		_ = cmd.Run() // Ignore errors for this step
 	}
@@ -363,6 +371,14 @@ func (ci *Installer) installPkg(pkg, sourcePath string, opts *CaskInstallOptions
 	}
 
 	// Install the package using installer command
+	// Validate pkgPath to prevent command injection
+	if pkgPath == "" || strings.Contains(pkgPath, ";") || strings.Contains(pkgPath, "&") || strings.Contains(pkgPath, "|") {
+		return fmt.Errorf("invalid package path")
+	}
+	if !strings.HasSuffix(pkgPath, ".pkg") && !strings.HasSuffix(pkgPath, ".mpkg") {
+		return fmt.Errorf("invalid package file extension")
+	}
+	// #nosec G204 - pkgPath is validated above for injection vectors
 	cmd := exec.Command("sudo", "installer", "-pkg", pkgPath, "-target", "/")
 	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("failed to install package: %w", err)

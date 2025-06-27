@@ -32,7 +32,11 @@
       "Bash(go:*)",
       "Bash(chmod:*)",
       "Bash(/tmp/brew-perfect:*)",
-      "Bash(~/go/bin/govulncheck ./...)"
+      "Bash(~/go/bin/govulncheck ./...)",
+      "Bash($HOME/go/bin/gosec:*)",
+      "Bash($HOME/go/bin/goreleaser check:*)",
+      "Bash($HOME/go/bin/goreleaser:*)",
+      "WebFetch(domain:goreleaser.com)"
     ],
     "deny": []
   }

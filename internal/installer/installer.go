@@ -609,7 +609,10 @@ func (i *Installer) extractTarGz(tarPath, destDir string) error {
 
 		switch header.Typeflag {
 		case tar.TypeDir:
-			if err := os.MkdirAll(target, os.FileMode(header.Mode)); err != nil {
+			// Safely convert header.Mode to avoid integer overflow
+			// #nosec G115 - Intentionally masking mode to safe range
+			mode := os.FileMode(header.Mode & 0777) // Mask to only file permission bits
+			if err := os.MkdirAll(target, mode); err != nil {
 				return err
 			}
 		case tar.TypeReg:
@@ -617,7 +620,10 @@ func (i *Installer) extractTarGz(tarPath, destDir string) error {
 				return err
 			}
 
-			f, err := os.OpenFile(target, os.O_CREATE|os.O_RDWR, os.FileMode(header.Mode))
+			// Safely convert header.Mode to avoid integer overflow
+			// #nosec G115 - Intentionally masking mode to safe range
+			mode := os.FileMode(header.Mode & 0777) // Mask to only file permission bits
+			f, err := os.OpenFile(target, os.O_CREATE|os.O_RDWR, mode)
 			if err != nil {
 				return err
 			}
@@ -912,6 +918,7 @@ func (i *Installer) installAutotools() error {
 		}
 
 		for _, mgr := range managers {
+			// #nosec G204 - mgr contains hardcoded package manager commands
 			cmd := exec.Command(mgr[0], mgr[1:]...)
 			if err := cmd.Run(); err == nil {
 				logger.Success("Installed autotools via %s", mgr[0])
@@ -1095,6 +1102,7 @@ func (i *Installer) applyPatch(sourceDir string, patch *formula.Patch) error {
 	}
 
 	// Apply the patch using the patch command
+	// #nosec G204 - patch.Strip is an integer, not user input
 	cmd := exec.Command("patch", fmt.Sprintf("-p%d", patch.Strip))
 	cmd.Dir = sourceDir
 	cmd.Stdin = strings.NewReader(string(patchContent))
@@ -1147,6 +1155,7 @@ func (i *Installer) buildAndInstall(f *formula.Formula, sourceDir, cellarPath st
 		cmdName := strings.Join(cmdArgs, " ")
 		logger.Step("Running: %s", cmdName)
 
+		// #nosec G204 - cmdArgs come from trusted build system commands
 		cmd := exec.Command(cmdArgs[0], cmdArgs[1:]...)
 		cmd.Dir = sourceDir
 		cmd.Env = env

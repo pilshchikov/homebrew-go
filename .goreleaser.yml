@@ -1,4 +1,6 @@
 # GoReleaser configuration for Homebrew Go
+version: 2
+
 project_name: homebrew-go
 
 before:
@@ -19,7 +21,9 @@ builds:
     goarch:
       - amd64
       - arm64
+      - arm
     goarm:
+      - 6
       - 7
     ldflags:
       - -s -w
@@ -40,10 +44,7 @@ archives:
       {{- if .Arm }}v{{ .Arm }}{{ end }}
     format_overrides:
       - goos: windows
-        format: zip
-    builds_info:
-      group: root
-      owner: root
+        formats: [zip]
     files:
       - README.md
       - LICENSE.txt
@@ -53,7 +54,7 @@ checksum:
   name_template: 'checksums.txt'
 
 snapshot:
-  name_template: "{{ .Version }}-snapshot"
+  version_template: "{{ .Version }}-snapshot"
 
 changelog:
   sort: asc
@@ -102,23 +103,6 @@ dockers:
     extra_files:
       - scripts/
 
-brews:
-  - name: homebrew-go
-    repository:
-      owner: pilshchikov
-      name: homebrew-go
-      branch: main
-    folder: Formula
-    homepage: https://github.com/pilshchikov/homebrew-go
-    description: "Homebrew Go - A complete rewrite of Homebrew from Ruby to Go"
-    license: BSD-2-Clause
-    test: |
-      system "#{bin}/brew", "--version"
-    dependencies:
-      - name: git
-      - name: curl
-    conflicts:
-      - brew
 
 release:
   github:
@@ -169,9 +153,4 @@ milestones:
     name_template: "{{ .Tag }}"
 
 announce:
-  mastodon:
-    enabled: true
-    message_template: 'Homebrew {{ .Tag }} is out! Check it out at {{ .ReleaseURL }}'
-  twitter:
-    enabled: true
-    message_template: 'Homebrew {{ .Tag }} is out! Check it out at {{ .ReleaseURL }}'
+  skip: "{{gt .Prerelease 1}}"

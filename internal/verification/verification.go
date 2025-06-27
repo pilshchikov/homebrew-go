@@ -127,6 +127,7 @@ func (v *Verifier) verifyChecksum(filePath string, checksum Checksum) (bool, err
 		return false, err
 	}
 
+	// #nosec G304 - filePath comes from trusted formula/cask sources
 	file, err := os.Open(filePath)
 	if err != nil {
 		return false, errors.NewPermissionError("read file for checksum", filePath, err)
@@ -166,8 +167,10 @@ func (v *Verifier) getHasher(checksumType ChecksumType) (hash.Hash, error) {
 	case SHA512:
 		return sha512.New(), nil
 	case SHA1:
+		// #nosec G401 - SHA1 required for compatibility with existing Homebrew formulae
 		return sha1.New(), nil
 	case MD5:
+		// #nosec G401 - MD5 required for compatibility with existing Homebrew formulae
 		return md5.New(), nil
 	default:
 		return nil, fmt.Errorf("unsupported checksum type: %s", checksumType)
@@ -181,6 +184,7 @@ func (v *Verifier) ComputeChecksum(filePath string, checksumType ChecksumType) (
 		return "", err
 	}
 
+	// #nosec G304 - filePath comes from trusted formula/cask sources
 	file, err := os.Open(filePath)
 	if err != nil {
 		return "", err

@@ -30,8 +30,26 @@ This project was created by **Stepan Pilshchikov** ([GitHub](https://github.com/
 Install Homebrew Go using our installation script:
 
 ```bash
+# Default installation (installs as 'brew-go')
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/pilshchikov/homebrew-go/main/install.sh)"
 ```
+
+### Custom Binary Name
+
+Install with a custom binary name to avoid conflicts or for personal preference:
+
+```bash
+# Install as 'hbrew'
+curl -sSL -o- https://raw.githubusercontent.com/pilshchikov/homebrew-go/main/install.sh | bash -s -- --name hbrew
+
+# Install as 'brew' (may conflict with original Homebrew)
+curl -sSL -o- https://raw.githubusercontent.com/pilshchikov/homebrew-go/main/install.sh | bash -s -- --name brew
+
+# Install to system directory with custom name
+curl -sSL -o- https://raw.githubusercontent.com/pilshchikov/homebrew-go/main/install.sh | bash -s -- --name brewgo --dir /usr/local/bin
+```
+
+**Note:** After installation, restart your terminal or run `source ~/.zshrc` (or `~/.bashrc`) to use the new command.
 
 ### Manual Installation
 

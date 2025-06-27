@@ -99,13 +99,15 @@ release:
   footer: >
     ## Installation Options
 
-    ### Quick Install
+    ### Quick Install (Automatic PATH setup)
 
     ```bash
 
     curl -sSL https://github.com/pilshchikov/homebrew-go/releases/download/{{ .Tag }}/install.sh | bash
 
     ```
+
+    After installation, restart your terminal or run: `source ~/.zshrc` (or `~/.bashrc`)
 
     ### Custom Binary Name
 

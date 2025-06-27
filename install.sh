@@ -128,13 +128,32 @@ echo
 echo "Binary installed to: $INSTALL_DIR/$BINARY_NAME"
 echo
 
-# Check if install directory is in PATH
+# Check if install directory is in PATH and add it automatically
 if [[ ":$PATH:" != *":$INSTALL_DIR:"* ]]; then
-    echo -e "${YELLOW}📝 To add to PATH:${NC}"
-    if [[ "$INSTALL_DIR" == "$HOME/.local/bin" ]]; then
-        echo "echo 'export PATH=\"\$HOME/.local/bin:\$PATH\"' >> ~/.bashrc && source ~/.bashrc"
+    echo -e "${YELLOW}📝 Adding $INSTALL_DIR to PATH...${NC}"
+    
+    # Detect shell and add to appropriate rc file
+    if [[ "$SHELL" == *"zsh"* ]] || [[ -n "$ZSH_VERSION" ]]; then
+        SHELL_RC="$HOME/.zshrc"
+    elif [[ "$SHELL" == *"bash"* ]] || [[ -n "$BASH_VERSION" ]]; then
+        SHELL_RC="$HOME/.bashrc"
     else
-        echo "echo 'export PATH=\"$INSTALL_DIR:\$PATH\"' >> ~/.bashrc && source ~/.bashrc"
+        SHELL_RC="$HOME/.profile"
+    fi
+    
+    # Add PATH export if not already there
+    if [[ "$INSTALL_DIR" == "$HOME/.local/bin" ]]; then
+        PATH_EXPORT='export PATH="$HOME/.local/bin:$PATH"'
+    else
+        PATH_EXPORT="export PATH=\"$INSTALL_DIR:\$PATH\""
+    fi
+    
+    if ! grep -q "$PATH_EXPORT" "$SHELL_RC" 2>/dev/null; then
+        echo "$PATH_EXPORT" >> "$SHELL_RC"
+        echo -e "${GREEN}✅ Added to $SHELL_RC${NC}"
+        echo -e "${YELLOW}⚠️  Run 'source $SHELL_RC' or restart your terminal to use $BINARY_NAME${NC}"
+    else
+        echo -e "${BLUE}ℹ️  PATH already configured in $SHELL_RC${NC}"
     fi
     echo
 fi

@@ -21,7 +21,7 @@ This project was created by **Stepan Pilshchikov** ([GitHub](https://github.com/
 ✅ **Formulae & Casks** - Full support for both formulae and cask installations
 ✅ **Tap System** - Compatible with existing Homebrew taps
 ✅ **Cross-Platform** - Supports macOS and Linux
-✅ **Performance** - Enhanced performance through Go's concurrency and efficiency
+✅ **Performance** - Enhanced performance through Go's concurrency and efficiency  
 
 ## Installation
 

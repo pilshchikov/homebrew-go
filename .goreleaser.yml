@@ -17,14 +17,9 @@ builds:
     goos:
       - linux
       - darwin
-      - windows
     goarch:
       - amd64
       - arm64
-      - arm
-    goarm:
-      - 6
-      - 7
     ldflags:
       - -s -w
       - -X main.Version={{.Version}}
@@ -42,9 +37,6 @@ archives:
       {{- else if eq .Arch "386" }}i386
       {{- else }}{{ .Arch }}{{ end }}
       {{- if .Arm }}v{{ .Arm }}{{ end }}
-    format_overrides:
-      - goos: windows
-        formats: [zip]
     files:
       - README.md
       - LICENSE*
@@ -92,13 +84,12 @@ release:
   github:
     owner: pilshchikov
     name: homebrew-go
-  discussion_category_name: General
   prerelease: auto
   mode: replace
   header: |
     ## Homebrew Build {{ .Tag }}
-    
-    **Build Date:** {{ .Date }}  
+
+    **Build Date:** {{ .Date }}
     **Commit:** {{ .ShortCommit }}
 
     This is an automated release of Homebrew Go.

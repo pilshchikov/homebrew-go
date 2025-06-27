@@ -887,7 +887,8 @@ func (i *Installer) installAutotools() error {
 	logger.Step("Installing autotools dependencies")
 
 	// Try different package managers based on the system
-	if runtime.GOOS == "darwin" {
+	switch runtime.GOOS {
+	case "darwin":
 		// Try to use Homebrew to install autotools
 		cmd := exec.Command("brew", "install", "autoconf", "automake", "libtool")
 		if err := cmd.Run(); err == nil {
@@ -901,7 +902,7 @@ func (i *Installer) installAutotools() error {
 			logger.Success("Installed autotools via MacPorts")
 			return nil
 		}
-	} else if runtime.GOOS == "linux" {
+	case "linux":
 		// Try different Linux package managers
 		managers := [][]string{
 			{"apt-get", "update", "&&", "apt-get", "install", "-y", "autoconf", "automake", "libtool"},

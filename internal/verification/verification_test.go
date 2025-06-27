@@ -16,6 +16,7 @@ func TestNewVerifier(t *testing.T) {
 	verifier := NewVerifier(true)
 	if verifier == nil {
 		t.Error("NewVerifier() should not return nil")
+		return
 	}
 
 	if !verifier.strictMode {

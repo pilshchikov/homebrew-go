@@ -30,7 +30,9 @@
       "Bash(golangci-lint run:*)",
       "Bash(go clean:*)",
       "Bash(go:*)",
-      "Bash(chmod:*)"
+      "Bash(chmod:*)",
+      "Bash(/tmp/brew-perfect:*)",
+      "Bash(~/go/bin/govulncheck ./...)"
     ],
     "deny": []
   }

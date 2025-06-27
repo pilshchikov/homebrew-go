@@ -344,6 +344,7 @@ func TestOptionsValidation(t *testing.T) {
 			installer := New(cfg, tt.opts)
 			if installer == nil {
 				t.Error("New() should not return nil")
+				return
 			}
 			if installer.opts != tt.opts {
 				t.Error("Options not properly stored")
@@ -352,28 +353,6 @@ func TestOptionsValidation(t *testing.T) {
 	}
 }
 
-// Helper function to create a test formula
-func createTestFormula() *formula.Formula {
-	return &formula.Formula{
-		Name:         "test-formula",
-		Version:      "1.0.0",
-		Homepage:     "https://example.com",
-		Description:  "A test formula",
-		URL:          "https://example.com/test-1.0.0.tar.gz",
-		SHA256:       "abcd1234efgh5678",
-		Dependencies: []string{"dependency1", "dependency2"},
-		Bottle: &formula.Bottle{
-			Stable: &formula.BottleSpec{
-				Files: map[string]formula.BottleFile{
-					getPlatform(): {
-						URL:    "https://example.com/test-1.0.0.bottle.tar.gz",
-						SHA256: "bottle_checksum",
-					},
-				},
-			},
-		},
-	}
-}
 
 func TestExtractTarGz(t *testing.T) {
 	// This is a basic test - in a real implementation,

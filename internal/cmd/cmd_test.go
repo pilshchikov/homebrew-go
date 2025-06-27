@@ -614,6 +614,7 @@ func TestUntapCommandFlags(t *testing.T) {
 
 	if cmd == nil {
 		t.Error("Untap command should not be nil")
+		return
 	}
 
 	// Test that flags exist

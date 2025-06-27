@@ -211,9 +211,10 @@ func getBoolEnv(key string, defaultValue bool) bool {
 			return parsed
 		}
 		// Handle "1" and "0" as boolean values
-		if value == "1" {
+		switch value {
+		case "1":
 			return true
-		} else if value == "0" {
+		case "0":
 			return false
 		}
 	}

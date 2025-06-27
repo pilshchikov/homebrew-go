@@ -159,31 +159,6 @@ func checkForUpdates(cfg *config.Config) {
 	logger.Debug("Auto-update completed")
 }
 
-// setupShellCompletion sets up shell completion
-func setupShellCompletion(cmd *cobra.Command) {
-	// Add completion command
-	completionCmd := &cobra.Command{
-		Use:       "completion [bash|zsh|fish|powershell]",
-		Short:     "Generate completion script",
-		Args:      cobra.ExactValidArgs(1),
-		ValidArgs: []string{"bash", "zsh", "fish", "powershell"},
-		RunE: func(cmd *cobra.Command, args []string) error {
-			switch args[0] {
-			case "bash":
-				return cmd.Root().GenBashCompletion(os.Stdout)
-			case "zsh":
-				return cmd.Root().GenZshCompletion(os.Stdout)
-			case "fish":
-				return cmd.Root().GenFishCompletion(os.Stdout, true)
-			case "powershell":
-				return cmd.Root().GenPowerShellCompletion(os.Stdout)
-			}
-			return nil
-		},
-	}
-
-	cmd.AddCommand(completionCmd)
-}
 
 // validateArgs validates common argument patterns
 func validateArgs(cmd *cobra.Command, args []string, minArgs int) error {

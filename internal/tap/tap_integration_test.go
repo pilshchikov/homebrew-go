@@ -29,6 +29,7 @@ func TestManagerOperations(t *testing.T) {
 	manager := NewManager(cfg)
 	if manager == nil {
 		t.Error("NewManager should not return nil")
+		return
 	}
 
 	if manager.cfg != cfg {

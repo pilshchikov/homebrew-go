@@ -621,7 +621,8 @@ func TestParseCaskFromAPIInvalid(t *testing.T) {
 func TestGetCask(t *testing.T) {
 	// Create a mock HTTP server
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path == "/cask/firefox.json" {
+		switch r.URL.Path {
+		case "/cask/firefox.json":
 			w.Header().Set("Content-Type", "application/json")
 			response := map[string]interface{}{
 				"token":     "firefox",
@@ -645,9 +646,9 @@ func TestGetCask(t *testing.T) {
 				},
 			}
 			_ = json.NewEncoder(w).Encode(response)
-		} else if r.URL.Path == "/cask/notfound.json" {
+		case "/cask/notfound.json":
 			http.NotFound(w, r)
-		} else {
+		default:
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		}
 	}))

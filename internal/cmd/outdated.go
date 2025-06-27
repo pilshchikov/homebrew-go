@@ -98,7 +98,7 @@ func runOutdated(cfg *config.Config, formulaNames []string, opts *outdatedOption
 }
 
 func getOutdatedFormulae(cfg *config.Config, formulaNames []string, opts *outdatedOptions) ([]OutdatedInfo, error) {
-	var outdatedFormulae []OutdatedInfo
+	outdatedFormulae := make([]OutdatedInfo, 0)
 
 	// Get list of installed formulae
 	var formulaeToCheck []string
@@ -111,6 +111,8 @@ func getOutdatedFormulae(cfg *config.Config, formulaNames []string, opts *outdat
 		}
 		formulaeToCheck = installed
 	}
+
+	logger.Debug("Checking formulae: %v", formulaeToCheck)
 
 	client := api.NewClient(cfg)
 

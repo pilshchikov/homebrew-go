@@ -74,6 +74,10 @@ type depsOptions struct {
 }
 
 func runDeps(cfg *config.Config, formulaNames []string, opts *depsOptions) error {
+	if len(formulaNames) == 0 {
+		return fmt.Errorf("no formulae specified")
+	}
+
 	if opts.showDependents {
 		return showDependents(cfg, formulaNames, opts)
 	}

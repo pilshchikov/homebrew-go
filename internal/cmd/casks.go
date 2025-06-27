@@ -154,7 +154,7 @@ func runCasks(cfg *config.Config, opts *casksOptions) error {
 		for _, cask := range casks {
 			names = append(names, cask.Token)
 		}
-		printColumns(names, 80)
+		printColumns(names, 4)
 	}
 
 	return nil
@@ -190,7 +190,7 @@ func runFormulae(cfg *config.Config, opts *formulaeOptions) error {
 		for _, formula := range formulae {
 			names = append(names, formula.Name)
 		}
-		printColumns(names, 80)
+		printColumns(names, 4)
 	}
 
 	return nil
@@ -284,7 +284,7 @@ func printCommands(commands []string, title string, quiet bool) error {
 			fmt.Println(cmd)
 		}
 	} else {
-		printColumns(commands, 80)
+		printColumns(commands, 4)
 	}
 
 	return nil
@@ -316,9 +316,13 @@ func outputFormulaeJSON(formulae []api.SearchResult) error {
 	return encoder.Encode(formulae)
 }
 
-func printColumns(items []string, maxWidth int) {
+func printColumns(items []string, cols int) {
 	if len(items) == 0 {
 		return
+	}
+
+	if cols < 1 {
+		cols = 1
 	}
 
 	// Calculate column width
@@ -330,10 +334,6 @@ func printColumns(items []string, maxWidth int) {
 	}
 
 	colWidth := maxLen + 2 // Add padding
-	cols := maxWidth / colWidth
-	if cols < 1 {
-		cols = 1
-	}
 
 	// Print items in columns
 	for i, item := range items {

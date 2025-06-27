@@ -53,7 +53,7 @@ checksum:
   name_template: 'checksums.txt'
 
 snapshot:
-  name_template: "{{ incpatch .Version }}-next"
+  name_template: "{{ .Version }}-snapshot"
 
 changelog:
   sort: asc
@@ -128,25 +128,36 @@ release:
   prerelease: auto
   mode: replace
   header: |
-    ## Homebrew {{ .Tag }} ({{ .Date }})
+    ## Homebrew Build {{ .Tag }}
+    
+    **Build Date:** {{ .Date }}  
+    **Commit:** {{ .ShortCommit }}
 
-    Welcome to this new release of Homebrew Go!
+    This is an automated release of Homebrew Go.
 
   footer: |
-    ## Docker Images
+    ## 🐳 Docker Images
 
     - `ghcr.io/pilshchikov/homebrew-go:{{ .Tag }}`
     - `ghcr.io/pilshchikov/homebrew-go:latest`
 
-    ## Installation
+    ## 📦 Installation
 
     ```bash
-    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/pilshchikov/homebrew-go/main/install.sh)"
+    # Download binary directly
+    curl -L https://github.com/pilshchikov/homebrew-go/releases/download/{{ .Tag }}/homebrew-go_Darwin_x86_64.tar.gz | tar xz
+    
+    # Or use Docker
+    docker run ghcr.io/pilshchikov/homebrew-go:{{ .Tag }} --version
     ```
 
-    ## Thanks
+    ## ✨ Automatic Build System
 
-    Thanks to all contributors who made this release possible!
+    This release was automatically generated with version `{{ .Tag }}` based on:
+    - **Year:** {{ .Date | date "2006" }}
+    - **Month:** {{ .Date | date "1" }}  
+    - **Day:** {{ .Date | date "02" }}
+    - **Build:** {{ .Env.GITHUB_RUN_NUMBER }}
 
   extra_files:
     - glob: ./docs/**/*

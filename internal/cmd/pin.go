@@ -14,7 +14,7 @@ import (
 func NewPinCmd(cfg *config.Config) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "pin FORMULA...",
-		Short: "Pin the specified formulae to their current versions",
+		Short: "Pin specified formulae to their current versions",
 		Long: `Pin the specified formulae to their current versions, preventing them from
 being upgraded when running 'brew upgrade'. This is useful for keeping
 specific versions of formulae that you don't want to upgrade automatically.
@@ -33,7 +33,7 @@ Pinned formulae will be ignored by 'brew upgrade' and 'brew upgrade --all'.`,
 func NewUnpinCmd(cfg *config.Config) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "unpin FORMULA...",
-		Short: "Unpin specified formulae, allowing them to be upgraded again",
+		Short: "Unpin specified formulae, allowing them to be upgraded",
 		Long: `Unpin the specified formulae, allowing them to be upgraded when running
 'brew upgrade'. This removes the pin that was set by 'brew pin'.`,
 		Args: cobra.MinimumNArgs(1),
@@ -46,6 +46,10 @@ func NewUnpinCmd(cfg *config.Config) *cobra.Command {
 }
 
 func runPin(cfg *config.Config, formulaNames []string) error {
+	if len(formulaNames) == 0 {
+		return fmt.Errorf("no formulae specified")
+	}
+
 	pinnedKegsDir := filepath.Join(cfg.HomebrewLibrary, "PinnedKegs")
 
 	// Ensure PinnedKegs directory exists
@@ -71,7 +75,7 @@ func runPin(cfg *config.Config, formulaNames []string) error {
 		}
 
 		// Create pin file
-		if err := createPinFile(pinFile, formulaName); err != nil {
+		if err := createPinFileWithConfig(cfg, pinFile, formulaName); err != nil {
 			errors = append(errors, fmt.Sprintf("Failed to pin %s: %v", formulaName, err))
 			continue
 		}
@@ -96,6 +100,10 @@ func runPin(cfg *config.Config, formulaNames []string) error {
 }
 
 func runUnpin(cfg *config.Config, formulaNames []string) error {
+	if len(formulaNames) == 0 {
+		return fmt.Errorf("no formulae specified")
+	}
+
 	pinnedKegsDir := filepath.Join(cfg.HomebrewLibrary, "PinnedKegs")
 
 	var unpinned []string
@@ -106,7 +114,7 @@ func runUnpin(cfg *config.Config, formulaNames []string) error {
 
 		// Check if pinned
 		if _, err := os.Stat(pinFile); os.IsNotExist(err) {
-			logger.Info("Formula %s is not pinned", formulaName)
+			errors = append(errors, fmt.Sprintf("Formula %s is not pinned", formulaName))
 			continue
 		}
 
@@ -136,8 +144,14 @@ func runUnpin(cfg *config.Config, formulaNames []string) error {
 }
 
 func createPinFile(pinFile, formulaName string) error {
+	// Create pin file with basic content
+	content := fmt.Sprintf("# Pin file for %s\n", formulaName)
+	return os.WriteFile(pinFile, []byte(content), 0644)
+}
+
+func createPinFileWithConfig(cfg *config.Config, pinFile, formulaName string) error {
 	// Get current installed version
-	installedVersions, err := getInstalledVersions(nil, formulaName)
+	installedVersions, err := getInstalledVersions(cfg, formulaName)
 	if err != nil {
 		return err
 	}

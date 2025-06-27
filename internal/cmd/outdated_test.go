@@ -106,6 +106,11 @@ func TestGetOutdatedFormulae(t *testing.T) {
 	os.MkdirAll(cfg.HomebrewCellar, 0755)
 	os.MkdirAll(cfg.HomebrewLibrary, 0755)
 
+	// Create a test formula with installed version
+	formulaDir := filepath.Join(cfg.HomebrewCellar, "test-formula")
+	versionDir := filepath.Join(formulaDir, "1.0.0")
+	os.MkdirAll(versionDir, 0755)
+
 	opts := &outdatedOptions{
 		verbose: true,
 	}
@@ -118,6 +123,8 @@ func TestGetOutdatedFormulae(t *testing.T) {
 
 	if outdated == nil {
 		t.Error("Expected non-nil outdated list")
+	} else {
+		t.Logf("Got outdated list with %d items", len(outdated))
 	}
 }
 

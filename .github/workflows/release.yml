@@ -1,9 +1,13 @@
 name: Release
 
 on:
-  push:
-    tags:
-      - 'v*'
+  workflow_dispatch:
+    inputs:
+      prerelease:
+        description: 'Mark as pre-release'
+        required: false
+        default: false
+        type: boolean
 
 env:
   GO_VERSION: "1.22"
@@ -12,6 +16,10 @@ jobs:
   release:
     name: Release
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+      discussions: write
     
     steps:
     - name: Checkout code
@@ -24,8 +32,33 @@ jobs:
       with:
         go-version: ${{ env.GO_VERSION }}
 
+    - name: Generate version
+      id: version
+      run: |
+        # Generate version in format YYYY.M.DD.BUILD_ID
+        YEAR=$(date +%Y)
+        MONTH=$(date +%-m)  # No leading zero
+        DAY=$(date +%d)
+        BUILD_ID=${{ github.run_number }}
+        VERSION="${YEAR}.${MONTH}.${DAY}.${BUILD_ID}"
+        
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+        echo "Generated version: $VERSION"
+
+    - name: Clean test cache
+      run: go clean -testcache
+
     - name: Run tests
       run: go test -v ./...
+
+    - name: Create release tag
+      run: |
+        VERSION=${{ steps.version.outputs.version }}
+        echo "Creating tag: $VERSION"
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        git tag -a "$VERSION" -m "Release $VERSION - $(date '+%Y-%m-%d %H:%M:%S UTC')"
+        git push origin "$VERSION"
 
     - name: Run GoReleaser
       uses: goreleaser/goreleaser-action@v6
@@ -35,10 +68,21 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+    - name: Update release as pre-release
+      if: github.event.inputs.prerelease == 'true'
+      run: |
+        VERSION=${{ steps.version.outputs.version }}
+        gh release edit "$VERSION" --prerelease
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
   docker:
     name: Build and Push Docker Image
     runs-on: ubuntu-latest
     needs: release
+    permissions:
+      contents: read
+      packages: write
     
     steps:
     - name: Checkout code

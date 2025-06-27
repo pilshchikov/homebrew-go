@@ -21,7 +21,7 @@ func NewLinkCmd(cfg *config.Config) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "link [OPTIONS] FORMULA...",
-		Short: "Symlink all of a formula's installed files into Homebrew's prefix",
+		Short: "Symlink all of a formula's installed files into the Homebrew prefix",
 		Long: `Symlink all of a formula's installed files into Homebrew's prefix. This is
 done automatically when you install formulae but can be useful if you need to
 re-link after certain changes.
@@ -50,7 +50,7 @@ func NewUnlinkCmd(cfg *config.Config) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "unlink [OPTIONS] FORMULA...",
-		Short: "Remove symlinks for a formula's installed files from Homebrew's prefix",
+		Short: "Remove symlinks for a formula from the Homebrew prefix",
 		Long: `Remove symlinks for a formula's installed files from Homebrew's prefix.
 This will not delete the installed files, only the symlinks to them.
 
@@ -79,6 +79,10 @@ type unlinkOptions struct {
 }
 
 func runLink(cfg *config.Config, formulaNames []string, opts *linkOptions) error {
+	if len(formulaNames) == 0 {
+		return fmt.Errorf("no formulae specified")
+	}
+
 	var linked []string
 	var errors []string
 
@@ -125,6 +129,10 @@ func runLink(cfg *config.Config, formulaNames []string, opts *linkOptions) error
 }
 
 func runUnlink(cfg *config.Config, formulaNames []string, opts *unlinkOptions) error {
+	if len(formulaNames) == 0 {
+		return fmt.Errorf("no formulae specified")
+	}
+
 	var unlinked []string
 	var errors []string
 

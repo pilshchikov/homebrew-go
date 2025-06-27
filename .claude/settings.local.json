@@ -27,7 +27,10 @@
       "Bash(./brew --help)",
       "Bash(./brew commands)",
       "Bash(golangci-lint help:*)",
-      "Bash(golangci-lint run:*)"
+      "Bash(golangci-lint run:*)",
+      "Bash(go clean:*)",
+      "Bash(go:*)",
+      "Bash(chmod:*)"
     ],
     "deny": []
   }

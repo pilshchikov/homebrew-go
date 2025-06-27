@@ -45,6 +45,10 @@ archives:
 checksum:
   name_template: 'checksums.txt'
 
+# Upload install.sh as a standalone release asset
+extra_files:
+  - glob: install.sh
+
 snapshot:
   version_template: "{{ .Version }}-snapshot"
 
